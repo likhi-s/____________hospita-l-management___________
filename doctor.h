@@ -4,12 +4,13 @@
 typedef struct doctor
 {
     int doctorId;
-    char doctorName[100];
+    char doctorName[50];
     char doctorSpecialization[20];
     float doctorConsultationFee;
     char doctorContactNumber[15];
     int doctorExperience;
     char doctorQualification[50];
+    char doctorStatus;
     struct doctor *next;
 } doctor;
 
@@ -23,6 +24,7 @@ enum DoctorManagementMenu
     SEARCH_DOCTOR_BY_ID,
     SEARCH_DOCTOR_BY_SPECIALIZATION,
     SORT_DOCTORS_BY_ID,
+    DELETE_DOCTOR_BY_ID,
     EXIT_DOCTOR_MANAGEMENT
 } ;
 
@@ -45,7 +47,7 @@ void displayDoctorDetails();
 void searchByDoctorId();
 void searchByDoctorSpecialization();
 void sortDoctorsById();
-
-
+void insertDoctorSortedByName();
+void deleteDoctorById();
 
 #endif // DOCTOR_H

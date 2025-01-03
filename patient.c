@@ -4,15 +4,14 @@
 #include <stdbool.h>
 #include "patient.h"
 
-#define USER_ID "patient_user"
-#define USER_PASSWORD "patient@123"
+#define USER_ID "123"
+#define USER_PASSWORD "123"
 #define FILE_NAME "patients.txt"
 
 patient *patientHead = NULL;
 patient *patientTemp;
-patient *patientNode ;
+patient *patientNode;
 FILE *fp;
-
 
 void loadPatientDataFromFile()
 {
@@ -27,10 +26,20 @@ void loadPatientDataFromFile()
     while (fgets(line, sizeof(line), fp))
     {
         patientNode = (patient *)malloc(sizeof(patient));
-        if (sscanf(line, "%d,%99[^,],%9[^,],%d,%99[^,],%19[^,],%19[^\n]",&patientNode->patientId, patientNode->patientName, patientNode->patientGender,&patientNode->patientAge, patientNode->patientAddress,patientNode->patientContactNumber, patientNode->patientEmergencyContactNumber) == 7)
+        if (sscanf(line, "%5d,%49[^,],%9[^,],%3d,%49[^,],%19[^,],%19[^,],%c\n",
+                   &patientNode->patientId, patientNode->patientName, patientNode->patientGender,
+                   &patientNode->patientAge, patientNode->patientAddress, patientNode->patientContactNumber,
+                   patientNode->patientEmergencyContactNumber, &patientNode->patientStatus) == 8)
         {
-            patientNode->next = NULL;
-            insertPatientSorted(patientNode);
+            if (patientNode->patientStatus == 'A')
+            {
+                patientNode->next = NULL;
+                insertPatientSorted();
+            }
+            else
+            {
+                free(patientNode);
+            }
         }
         else
         {
@@ -40,12 +49,10 @@ void loadPatientDataFromFile()
     printf("Patient data loaded from file.\n");
 }
 
-
 void loginAsPatientManagementUser()
 {
     fp = fopen(FILE_NAME, "r+");
-    if (fp == NULL)
-    {
+    if (fp == NULL) {
         fp = fopen(FILE_NAME, "w+");
         if (fp == NULL)
         {
@@ -53,6 +60,7 @@ void loginAsPatientManagementUser()
             exit(1);
         }
     }
+
     char userId[15];
     char userPass[15];
     printf("User ID:\n");
@@ -67,32 +75,35 @@ void loginAsPatientManagementUser()
         while (true)
         {
             printf("\n--- Patient Management System ---\n");
-            printf("1. Register patient\n2. Update patient details\n3. Display Patients by Name\n4. Search Patient by ID\n5. Search Patient by Name\n6. Sort By ID\n7. Exit from Patient Menu\n");
+            printf("1. Register patient\n2. Update patient details\n3. Display Patients by Name\n4. Search Patient by ID\n5. Search Patient by Name\n6. Sort By ID\n7. Delete Patient\n8. Exit from Patient Menu\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
             switch (option)
             {
-            case REGISTER_PATIENT:
+            case 1:
                 registerPatient();
                 break;
-            case UPDATE_PATIENT_DETAILS:
+            case 2:
                 updatePatientDetails();
                 break;
-            case DISPLAY_AVAILABLE_PATIENTS_BY_NAME:
+            case 3:
                 displayPatientDetails();
                 break;
-            case SEARCH_PATIENT_BY_ID:
+            case 4:
                 searchByPatientId();
                 break;
-            case SEARCH_PATIENT_BY_NAME:
+            case 5:
                 searchByPatientName();
                 break;
-            case SORT_BY_PATIENT_ID:
+            case 6:
                 sortPatientsById();
                 break;
-            case EXIT_PATIENT_MANAGEMENT:
-                printf("saved data and exiting from patient menu\n");
+            case 7:
+                deletePatient();
+                break;
+            case 8:
+                printf("Saved data and exiting from patient menu\n");
                 fclose(fp);
                 return;
             default:
@@ -145,41 +156,21 @@ void registerPatient()
     printf("Enter Emergency Contact Number: ");
     scanf("%s", patientNode->patientEmergencyContactNumber);
 
+    patientNode->patientStatus = 'A';
     patientNode->next = NULL;
 
     insertPatientSorted();
 
     fseek(fp, 0, SEEK_END);
-
-    fprintf(fp, "%d,%s,%s,%d,%s,%s,%s\n", patientNode->patientId, patientNode->patientName, patientNode->patientGender, patientNode->patientAge, patientNode->patientAddress, patientNode->patientContactNumber, patientNode->patientEmergencyContactNumber);
+    fprintf(fp, "%5d,%-49s,%-9s,%3d,%-49s,%-19s,%-19s,%c\n", patientNode->patientId, patientNode->patientName, patientNode->patientGender, patientNode->patientAge, patientNode->patientAddress, patientNode->patientContactNumber, patientNode->patientEmergencyContactNumber, patientNode->patientStatus);
     fflush(fp);
     printf("Patient registered successfully and saved to file!\n");
-
 }
 
-void insertPatientSorted()
+void deletePatient()
 {
-    if (patientHead == NULL || strcasecmp(patientHead->patientName, patientNode->patientName) > 0)
-    {
-        patientNode->next = patientHead;
-        patientHead = patientNode;
-    }
-    else
-    {
-        patientTemp = patientHead;
-        while (patientTemp->next != NULL && strcasecmp(patientTemp->next->patientName, patientNode->patientName) < 0)
-        {
-            patientTemp = patientTemp->next;
-        }
-        patientNode->next = patientTemp->next;
-        patientTemp->next = patientNode;
-    }
-}
-
-void updatePatientDetails()
-{
-    int id, choice;
-    printf("Enter Patient ID to update: ");
+    int id;
+    printf("Enter Patient ID to delete: ");
     scanf("%d", &id);
 
     patientTemp = patientHead;
@@ -187,42 +178,9 @@ void updatePatientDetails()
     {
         if (patientTemp->patientId == id)
         {
-            printf("Updating details for %s...\n", patientTemp->patientName);
-            printf("1. Name\n2. Gender\n3. Age\n4. Address\n5. Contact Number\n6. Emergency Contact Number\n");
-            printf("Enter your choice: ");
-            scanf("%d", &choice);
+            patientTemp->patientStatus = 'D';
+            printf("Patient with ID %d marked as deleted.\n", id);
 
-            switch (choice)
-            {
-            case UPDATE_PATIENT_NAME:
-                printf("New Name: ");
-                scanf(" %[^\n]", patientTemp->patientName);
-                break;
-            case UPDATE_PATIENT_GENDER:
-                printf("New Gender: ");
-                scanf("%s", patientTemp->patientGender);
-                break;
-            case UPDATE_PATIENT_AGE:
-                printf("New Age: ");
-                scanf("%d", &patientTemp->patientAge);
-                break;
-            case UPDATE_PATIENT_ADDRESS:
-                printf("New Address: ");
-                scanf(" %[^\n]", patientTemp->patientAddress);
-                break;
-            case UPDATE_PATIENT_CONTACT_NUMBER:
-                printf("New Contact Number: ");
-                scanf("%s", patientTemp->patientContactNumber);
-                break;
-            case UPDATE_PATIENT_EMERGENCY_CONTACT_NUMBER:
-                printf("New Emergency Contact: ");
-                scanf("%s", patientTemp->patientEmergencyContactNumber);
-                break;
-            default:
-                printf("Invalid choice.\n");
-                return;
-            }
-            printf("Patient details updated successfully in memory.\n");
             rewind(fp);
             long position;
             char line[256];
@@ -230,12 +188,11 @@ void updatePatientDetails()
             {
                 int existingId;
                 sscanf(line, "%d,", &existingId);
-
                 if (existingId == id)
                 {
-                    position = ftell(fp) - strlen(line);
+                    position = (ftell(fp)-1) - strlen(line);
                     fseek(fp, position, SEEK_SET);
-                    fprintf(fp, ",%s,%s,%d,%s,%s,%s\n", patientTemp->patientName, patientTemp->patientGender,patientTemp->patientAge, patientTemp->patientAddress,patientTemp->patientContactNumber, patientTemp->patientEmergencyContactNumber);
+                    fprintf(fp, "%5d,%-49s,%-9s,%3d,%-49s,%-9s,%-9s,%c\n", patientTemp->patientName, patientTemp->patientGender, patientTemp->patientAge, patientTemp->patientAddress, patientTemp->patientContactNumber, patientTemp->patientEmergencyContactNumber, 'D');
                     fflush(fp);
                     break;
                 }
@@ -246,6 +203,95 @@ void updatePatientDetails()
     }
     printf("Patient with ID %d not found.\n", id);
 }
+
+void insertPatientSorted() {
+    if (patientHead == NULL || strcasecmp(patientHead->patientName, patientNode->patientName) > 0) {
+        patientNode->next = patientHead;
+        patientHead = patientNode;
+    } else {
+        patientTemp = patientHead;
+        while (patientTemp->next != NULL && strcasecmp(patientTemp->next->patientName, patientNode->patientName) < 0) {
+            patientTemp = patientTemp->next;
+        }
+        patientNode->next = patientTemp->next;
+        patientTemp->next = patientNode;
+    }
+}
+void updatePatientDetails()
+{
+    int id, choice;
+    printf("Enter Patient ID to update: ");
+    scanf("%d", &id);
+
+    patientTemp = patientHead;
+    while (patientTemp != NULL)
+    {
+        if (patientTemp->patientId == id && patientTemp->patientStatus)
+        {
+            printf("Updating details for %s...\n", patientTemp->patientName);
+            printf("1. Name\n2. Gender\n3. Age\n4. Address\n5. Contact Number\n6. Emergency Contact Number\n");
+            printf("Enter your choice: ");
+            scanf("%d", &choice);
+
+            switch (choice)
+            {
+            case 1:
+                printf("New Name: ");
+                scanf(" %[^\n]", patientTemp->patientName);
+                break;
+            case 2:
+                printf("New Gender: ");
+                scanf("%s", patientTemp->patientGender);
+                break;
+            case 3:
+                printf("New Age: ");
+                scanf("%d", &patientTemp->patientAge);
+                break;
+            case 4:
+                printf("New Address: ");
+                scanf(" %[^\n]", patientTemp->patientAddress);
+                break;
+            case 5:
+                printf("New Contact Number: ");
+                scanf("%s", patientTemp->patientContactNumber);
+                break;
+            case 6:
+                printf("New Emergency Contact: ");
+                scanf("%s", patientTemp->patientEmergencyContactNumber);
+                break;
+            default:
+                printf("Invalid choice.\n");
+                return;
+            }
+
+            printf("Patient details updated successfully in memory.\n");
+
+            rewind(fp);
+            long position;
+            char line[256];
+
+            while (fgets(line, sizeof(line), fp)) {
+                int existingId;
+                sscanf(line, "%d,", &existingId);
+
+                if (existingId == id) {
+                    position = (ftell(fp)-1) - strlen(line);
+                    fseek(fp, position, SEEK_SET);
+
+                    fprintf(fp, "%5d,%-49s,%-9s,%3d,%-49s,%-19s,%-19s,%c\n",patientTemp->patientId, patientTemp->patientName, patientTemp->patientGender, patientTemp->patientAge, patientTemp->patientAddress, patientTemp->patientContactNumber, patientTemp->patientEmergencyContactNumber, patientTemp->patientStatus);
+                    fflush(fp);
+                    break;
+                }
+            }
+
+            return;
+        }
+        patientTemp = patientTemp->next;
+    }
+
+    printf("Patient with ID %d not found.\n", id);
+}
+
 
 void displayPatientDetails()
 {
@@ -258,14 +304,17 @@ void displayPatientDetails()
     patientTemp = patientHead;
     while (patientTemp != NULL)
     {
-        printf("Patient ID: %d\n", patientTemp->patientId);
-        printf("Name: %s\n", patientTemp->patientName);
-        printf("Gender: %s\n", patientTemp->patientGender);
-        printf("Age: %d\n", patientTemp->patientAge);
-        printf("Address: %s\n", patientTemp->patientAddress);
-        printf("Contact Number: %s\n", patientTemp->patientContactNumber);
-        printf("Emergency Contact Number: %s\n", patientTemp->patientEmergencyContactNumber);
-        printf("\n");
+        if (patientTemp->patientStatus == 'A')
+        {
+            printf("Patient ID: %d\n", patientTemp->patientId);
+            printf("Name: %s\n", patientTemp->patientName);
+            printf("Gender: %s\n", patientTemp->patientGender);
+            printf("Age: %d\n", patientTemp->patientAge);
+            printf("Address: %s\n", patientTemp->patientAddress);
+            printf("Contact Number: %s\n", patientTemp->patientContactNumber);
+            printf("Emergency Contact Number: %s\n", patientTemp->patientEmergencyContactNumber);
+            printf("\n");
+        }
         patientTemp = patientTemp->next;
     }
 }
@@ -279,7 +328,7 @@ void searchByPatientId()
     patientTemp = patientHead;
     while (patientTemp != NULL)
     {
-        if (patientTemp->patientId == id)
+        if (patientTemp->patientId == id && patientTemp->patientStatus == 'A')
         {
             printf("Patient ID: %d\n", patientTemp->patientId);
             printf("Name: %s\n", patientTemp->patientName);
@@ -305,7 +354,7 @@ void searchByPatientName()
     patientTemp = patientHead;
     while (patientTemp != NULL)
     {
-        if (strcasecmp(name, patientTemp->patientName) == 0)
+        if (strcasecmp(name, patientTemp->patientName) == 0 && patientTemp->patientStatus == 'A')
         {
             printf("Patient ID: %d\n", patientTemp->patientId);
             printf("Name: %s\n", patientTemp->patientName);
@@ -321,6 +370,7 @@ void searchByPatientName()
     }
     printf("Patient with Name '%s' not found.\n", name);
 }
+
 
 
 void sortPatientsById()
@@ -439,3 +489,5 @@ void sortPatientsById()
         free(temp);
     }
 }
+
+

@@ -10,6 +10,7 @@ typedef struct roomManagement
     int availableBeds;
     char bedStatus[10];// occupied/vacant
     float roomFee;
+    char roomStatus;
     struct roomManagement *next;
 }room;
 
@@ -23,6 +24,7 @@ enum RoomManagementOptions
     SEARCH_ROOM_BY_TYPE,
     CHECK_ROOM_AVAILABILITY,
     SORT_BY_ROOM_ID,
+    DELETE_ROOM_BY_ID,
     EXIT_ROOM_MANAGEMENT
 };
 
@@ -44,6 +46,6 @@ void searchByRoomId();
 void searchByRoomType();
 void checkAvailability();
 void sortByRoomId();
-
+void deleteRoomById();
 
 #endif // ROOM_H

@@ -4,32 +4,32 @@
 #include <stdbool.h>
 #include "room.h"
 
-#define USER_ID "room_user"
-#define USER_PASSWORD "room@123"
-#define FILE_NAME "rooms.txt"
+#define ROOM_FILE_NAME "rooms.txt"
+#define ROOM_USER_ID "123"
+#define ROOM_USER_PASSWORD "123"
 
 room *roomHead = NULL;
 room *roomTemp;
 room *roomNode;
-FILE *fr;
+FILE *rm;
 
 void loadRoomDataFromFile()
 {
-    if (fr == NULL)
+    if (rm == NULL)
     {
         printf("File is not open for reading.\n");
         return;
     }
-    rewind(fr);
+    rewind(rm);
 
     char line[256];
-    while (fgets(line, sizeof(line), fr))
+    while (fgets(line, sizeof(line), rm))
     {
         roomNode = (room *)malloc(sizeof(room));
-        if (sscanf(line, "%d,%9[^,],%d,%d,%9[^,],%f\n", &roomNode->roomId, roomNode->roomType, &roomNode->bedCount, &roomNode->availableBeds, roomNode->bedStatus, &roomNode->roomFee) == 6)
+        if (sscanf(line, "%5d,%9[^,],%d,%d,%9[^,],%f,%c", &roomNode->roomId, roomNode->roomType, &roomNode->bedCount, &roomNode->availableBeds, roomNode->bedStatus, &roomNode->roomFee, &roomNode->roomStatus) == 7)
         {
             roomNode->next = NULL;
-            insertRoomSorted(roomNode);
+            insertRoomSortedById();
         }
         else
         {
@@ -41,11 +41,11 @@ void loadRoomDataFromFile()
 
 void loginAsRoomManagementUser()
 {
-    fr = fopen(FILE_NAME, "r+");
-    if (fr == NULL)
+    rm = fopen(ROOM_FILE_NAME, "r+");
+    if (rm == NULL)
     {
-        fr = fopen(FILE_NAME, "w+");
-        if (fr == NULL)
+        rm = fopen(ROOM_FILE_NAME, "w+");
+        if (rm == NULL)
         {
             printf("Unable to open or create file.\n");
             exit(1);
@@ -59,14 +59,14 @@ void loginAsRoomManagementUser()
     printf("User Password:\n");
     scanf(" %[^\n]", userPass);
 
-    if (strcmp(userId, USER_ID) == 0 && strcmp(userPass, USER_PASSWORD) == 0)
+    if (strcmp(userId, ROOM_USER_ID) == 0 && strcmp(userPass, ROOM_USER_PASSWORD) == 0)
     {
         loadRoomDataFromFile();
         int option;
         while (true)
         {
             printf("\n--- Room Management System ---\n");
-            printf("1. Add New Room\n2. Update Room Details\n3. Display Rooms\n4. Search Room by ID\n5. Search Room by Type\n6. Check Room Availability\n7. Sort By Room ID\n8. Exit Room Menu\n");
+            printf("1. Add New Room\n2. Update Room Details\n3. Display Available Rooms\n4. Search Room by ID\n5. Search Room by Type\n6. Check Room Availability\n7. Sort By Room ID\n8. Delete Room by ID\n9. Exit\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -93,9 +93,12 @@ void loginAsRoomManagementUser()
             case SORT_BY_ROOM_ID:
                 sortByRoomId();
                 break;
+            case DELETE_ROOM_BY_ID:
+                deleteRoomById();
+                break;
             case EXIT_ROOM_MANAGEMENT:
-                printf("Saved data and exiting from room menu.\n");
-                fclose(fr);
+                printf("Saved data and exiting from room management menu.\n");
+                fclose(rm);
                 return;
             default:
                 printf("Invalid choice, try again.\n");
@@ -107,7 +110,7 @@ void loginAsRoomManagementUser()
     {
         printf("Invalid User ID or Password!\n");
     }
-    fclose(fr);
+    fclose(rm);
 }
 
 void addRoom()
@@ -145,19 +148,20 @@ void addRoom()
     printf("Enter Room Fee: ");
     scanf("%f", &roomNode->roomFee);
 
+    roomNode->roomStatus = 'A';
     roomNode->next = NULL;
 
-    insertRoomSorted(roomNode);
+    insertRoomSortedById();
 
-    fseek(fr, 0, SEEK_END);
-    fprintf(fr, "%d,%s,%d,%d,%s,%.2f\n", roomNode->roomId, roomNode->roomType, roomNode->bedCount, roomNode->availableBeds, roomNode->bedStatus, roomNode->roomFee);
-    fflush(fr);
+    fseek(rm, 0, SEEK_END);
+    fprintf(rm, "%5d,%-9s,%d,%d,%-9s,%f,%c\n", roomNode->roomId, roomNode->roomType, roomNode->bedCount, roomNode->availableBeds, roomNode->bedStatus, roomNode->roomFee, roomNode->roomStatus);
+    fflush(rm);
     printf("Room added successfully and saved to file!\n");
 }
 
-void insertRoomSorted(room *roomNode)
+void insertRoomSortedById()
 {
-    if (roomHead == NULL || roomHead->roomType > roomNode->roomType)
+    if (roomHead == NULL || roomHead->roomId > roomNode->roomId)
     {
         roomNode->next = roomHead;
         roomHead = roomNode;
@@ -165,13 +169,52 @@ void insertRoomSorted(room *roomNode)
     else
     {
         roomTemp = roomHead;
-        while (roomTemp->next != NULL && roomTemp->next->roomType < roomNode->roomType)
+        while (roomTemp->next != NULL && roomTemp->next->roomId < roomNode->roomId)
         {
             roomTemp = roomTemp->next;
         }
         roomNode->next = roomTemp->next;
         roomTemp->next = roomNode;
     }
+}
+
+void deleteRoomById()
+{
+    int id;
+    printf("Enter Room ID to delete: ");
+    scanf("%d", &id);
+
+    roomTemp = roomHead;
+    while (roomTemp != NULL)
+    {
+        if (roomTemp->roomId == id)
+        {
+            roomTemp->roomStatus = 'D'; // Mark the room as deleted
+            printf("Room with ID %d marked as deleted.\n", id);
+
+            // Rewrite the file to reflect the deletion
+            rewind(rm);
+            long position;
+            char line[256];
+            while (fgets(line, sizeof(line), rm))
+            {
+                int existingId;
+                sscanf(line, "%d,", &existingId);
+                if (existingId == id)
+                {
+                    position = (ftell(rm) - 1) - strlen(line); // Get the position of the line
+                    fseek(rm, position, SEEK_SET);
+                    // Update the line to mark the room as deleted
+                    fprintf(rm, "%5d,%-9s,%d,%d,%-9s,%f,%c\n", roomTemp->roomId, roomTemp->roomType, roomTemp->bedCount, roomTemp->availableBeds, roomTemp->bedStatus, roomTemp->roomFee, 'D');
+                    fflush(rm); // Ensure the changes are written immediately
+                    break;
+                }
+            }
+            return;
+        }
+        roomTemp = roomTemp->next;
+    }
+    printf("Room with ID %d not found.\n", id);
 }
 
 void updateRoomDetails()
@@ -183,11 +226,11 @@ void updateRoomDetails()
     roomTemp = roomHead;
     while (roomTemp != NULL)
     {
-        if (roomTemp->roomId == id)
+        if (roomTemp->roomId == id && roomTemp->roomStatus == 'A')
         {
             printf("Updating details for Room ID %d...\n", roomTemp->roomId);
             printf("1. Room Type\n2. Bed Count\n3. Available Beds\n4. Bed Status\n5. Room Fee\n");
-            printf("Enter your choice: ");
+            printf("Enter your choice (1-5): ");
             scanf("%d", &choice);
 
             switch (choice)
@@ -205,7 +248,7 @@ void updateRoomDetails()
                 scanf("%d", &roomTemp->availableBeds);
                 break;
             case UPDATE_BED_STATUS:
-                printf("New Bed Status: ");
+                printf("New Bed Status (occupied/vacant): ");
                 scanf(" %[^\n]", roomTemp->bedStatus);
                 break;
             case UPDATE_ROOM_FEE:
@@ -219,23 +262,31 @@ void updateRoomDetails()
 
             printf("Room details updated successfully in memory.\n");
 
-            rewind(fr);
-            long position;
+            // Update the room details in the file
+            rewind(rm); // Rewind the file pointer to the start of the file
             char line[256];
-            while (fgets(line, sizeof(line), fr))
+            long position = 0;
+            while (fgets(line, sizeof(line), rm))
             {
                 int existingId;
                 sscanf(line, "%d,", &existingId);
 
                 if (existingId == id)
                 {
-                    position = ftell(fr) - strlen(line);
-                    fseek(fr, position, SEEK_SET);
-                    fprintf(fr, ",%s,%d,%d,%s,%.2f\n", roomTemp->roomType, roomTemp->bedCount, roomTemp->availableBeds, roomTemp->bedStatus, roomTemp->roomFee);
-                    fflush(fr);
+                    position = (ftell(rm) - 1) - strlen(line); // Get the position of the line
+                    fseek(rm, position, SEEK_SET); // Move file pointer to the correct position
+
+                    // Write the updated room details to the file
+                    fprintf(rm, "%5d,%-9s,%d,%d,%-9s,%f,%c\n",
+                            roomTemp->roomId, roomTemp->roomType,
+                            roomTemp->bedCount, roomTemp->availableBeds,
+                            roomTemp->bedStatus, roomTemp->roomFee, roomTemp->roomStatus);
+
+                    fflush(rm); // Ensure changes are written immediately
                     break;
                 }
             }
+
             return;
         }
         roomTemp = roomTemp->next;
@@ -244,25 +295,28 @@ void updateRoomDetails()
     printf("Room with ID %d not found.\n", id);
 }
 
-
 void displayRoomDetails()
 {
     if (roomHead == NULL)
     {
-        printf("No rooms found.\n");
+        printf("No available rooms to display.\n");
         return;
     }
 
     roomTemp = roomHead;
+    printf("--- Room Details ---\n");
     while (roomTemp != NULL)
     {
-        printf("Room ID: %d\n", roomTemp->roomId);
-        printf("Type: %s\n", roomTemp->roomType);
-        printf("Bed Count: %d\n", roomTemp->bedCount);
-        printf("Available Beds: %d\n", roomTemp->availableBeds);
-        printf("Bed Status: %s\n", roomTemp->bedStatus);
-        printf("Room Fee: %.2f\n", roomTemp->roomFee);
-        printf("\n");
+        if (roomTemp->roomStatus == 'A')
+        {
+            printf("Room ID: %d\n", roomTemp->roomId);
+            printf("Type: %s\n", roomTemp->roomType);
+            printf("Bed Count: %d\n", roomTemp->bedCount);
+            printf("Available Beds: %d\n", roomTemp->availableBeds);
+            printf("Bed Status: %s\n", roomTemp->bedStatus);
+            printf("Room Fee: %.2f\n", roomTemp->roomFee);
+            printf("\n");
+        }
         roomTemp = roomTemp->next;
     }
 }
@@ -276,10 +330,10 @@ void searchByRoomId()
     roomTemp = roomHead;
     while (roomTemp != NULL)
     {
-        if (roomTemp->roomId == id)
+        if (roomTemp->roomId == id && roomTemp->roomStatus == 'A')
         {
             printf("--- Room Found ---\n");
-            printf("Room Type: %s\n", roomTemp->roomType);
+            printf("Type: %s\n", roomTemp->roomType);
             printf("Bed Count: %d\n", roomTemp->bedCount);
             printf("Available Beds: %d\n", roomTemp->availableBeds);
             printf("Bed Status: %s\n", roomTemp->bedStatus);
@@ -301,10 +355,10 @@ void searchByRoomType()
     roomTemp = roomHead;
     while (roomTemp != NULL)
     {
-        if (strcasecmp(type, roomTemp->roomType) == 0)
+        if (strcasecmp(type, roomTemp->roomType) == 0 && roomTemp->roomStatus == 'A')
         {
             printf("--- Room Found ---\n");
-            printf("Room ID: %d\n", roomTemp->roomId);
+            printf("ID: %d\n", roomTemp->roomId);
             printf("Bed Count: %d\n", roomTemp->bedCount);
             printf("Available Beds: %d\n", roomTemp->availableBeds);
             printf("Bed Status: %s\n", roomTemp->bedStatus);
@@ -326,15 +380,24 @@ void checkAvailability()
     roomTemp = roomHead;
     while (roomTemp != NULL)
     {
-        if (roomTemp->roomId == id)
+        if (roomTemp->roomId == id && roomTemp->roomStatus == 'A')
         {
-            printf("Room ID %d has %d available beds.\n", roomTemp->roomId, roomTemp->availableBeds);
+            if (roomTemp->availableBeds > 0)
+            {
+                printf("Room ID %d is available with %d beds.\n", id, roomTemp->availableBeds);
+            }
+            else
+            {
+                printf("Room ID %d is fully occupied.\n", id);
+            }
             return;
         }
         roomTemp = roomTemp->next;
     }
     printf("Room with ID %d not found.\n", id);
 }
+
+
 void sortByRoomId()
 {
     if (roomHead == NULL)

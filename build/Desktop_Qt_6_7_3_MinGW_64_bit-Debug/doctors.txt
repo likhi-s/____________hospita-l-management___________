@@ -1,0 +1,2 @@
+    1,likhitha                                         ,ortho              ,   1500.00,784512        ,  2,MBBS                                             ,D
+    2,pallavi T                                        ,dermo              ,   1500.00,874518451     ,  2,MBBS                                             ,A

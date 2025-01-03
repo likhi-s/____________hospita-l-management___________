@@ -1,0 +1,4 @@
+
+    1,pallavi T                                        ,female   , 23,tumkur                                           ,4852               ,4528               ,A
+    2,likhitha                                         ,female   , 23,fghj                                             ,45                 ,5426               ,A
+

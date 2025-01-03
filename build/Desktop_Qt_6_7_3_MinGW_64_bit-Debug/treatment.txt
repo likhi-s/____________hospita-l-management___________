@@ -1,0 +1,2 @@
+    1,typoidddd                                                                                          ,     25000,   10,D
+    2,dengue                                                                                             ,      4000,   13,A

@@ -6,6 +6,7 @@ typedef struct treatment
     char treatmentName[100];
     int treatmentCost;
     int treatmentDuration;//in days
+    char treatmentStatus;
     struct treatment *next;
 }treatment;
 
@@ -18,6 +19,7 @@ enum TreatmentManagementOptions
     SEARCH_TREATMENT_BY_ID,
     SEARCH_TREATMENT_BY_NAME,
     SORT_TREATMENT_BY_ID,
+    DELETE_TREATMENT_BY_ID,
     EXIT_TREATMENT_MANAGEMENT
 };
 
@@ -37,6 +39,7 @@ void displayTreatment();
 void searchByTreatmentId();
 void searchByTreatmentName();
 void sortTreatmentById();
+void deleteTreatmentById();
 
 
 
