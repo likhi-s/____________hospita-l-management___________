@@ -4,9 +4,9 @@
 #include <stdbool.h>
 #include "treatment.h"
 
-#define USER_ID "treatment_user"
-#define USER_PASSWORD "treatment@123"
-#define FILE_NAME "treatments.txt"
+#define TREATMENT_FILE_NAME "treatment.txt"
+#define TREATMENT_USER_ID "123"
+#define TREATMENT_USER_PASSWORD "123"
 
 treatment *treatmentHead = NULL;
 treatment *treatmentTemp;
@@ -26,10 +26,13 @@ void loadTreatmentDataFromFile()
     while (fgets(line, sizeof(line), ft))
     {
         treatmentNode = (treatment *)malloc(sizeof(treatment));
-        if (sscanf(line, "%d,%99[^,],%d,%d\n", &treatmentNode->treatmentId, treatmentNode->treatmentName, &treatmentNode->treatmentCost, &treatmentNode->treatmentDuration) == 4)
+        if (sscanf(line, "%5d,%99[^,],%10d,%5d,%c", &treatmentNode->treatmentId, treatmentNode->treatmentName, &treatmentNode->treatmentCost, &treatmentNode->treatmentDuration, &treatmentNode->treatmentStatus) == 5)
         {
-            treatmentNode->next = NULL;
-            insertTreatmentSorted(treatmentNode);
+            if (treatmentNode->treatmentStatus == 'A')
+            {
+                treatmentNode->next = NULL;
+                insertTreatmentSortedByName();
+            }
         }
         else
         {
@@ -41,10 +44,10 @@ void loadTreatmentDataFromFile()
 
 void loginAsTreatmentAndPriceManagementUser()
 {
-    ft = fopen(FILE_NAME, "r+");
+    ft = fopen(TREATMENT_FILE_NAME, "r+");
     if (ft == NULL)
     {
-        ft = fopen(FILE_NAME, "w+");
+        ft = fopen(TREATMENT_FILE_NAME, "w+");
         if (ft == NULL)
         {
             printf("Unable to open or create file.\n");
@@ -59,14 +62,14 @@ void loginAsTreatmentAndPriceManagementUser()
     printf("User Password:\n");
     scanf(" %[^\n]", userPass);
 
-    if (strcmp(userId, USER_ID) == 0 && strcmp(userPass, USER_PASSWORD) == 0)
+    if (strcmp(userId, TREATMENT_USER_ID) == 0 && strcmp(userPass, TREATMENT_USER_PASSWORD) == 0)
     {
         loadTreatmentDataFromFile();
         int option;
         while (true)
         {
-            printf("\n--- Treatment Management System ---\n");
-            printf("1. Add New Treatment\n2. Update Treatment Details\n3. Display All Treatments\n4. Search Treatment by ID\n5. Search Treatment by Name\n6. Sort By Treatment ID\n7. Exit Treatment Menu\n");
+            printf("\n--- Treatment and Price Management System ---\n");
+            printf("1. Add Treatment\n2. Update Treatment Details\n3. Display Treatments\n4. Search Treatment by ID\n5. Search Treatment by Name\n6. Sort By ID\n7. Delete Treatment Record by ID\n8. Exit\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -89,6 +92,9 @@ void loginAsTreatmentAndPriceManagementUser()
                 break;
             case SORT_TREATMENT_BY_ID:
                 sortTreatmentById();
+                break;
+            case DELETE_TREATMENT_BY_ID:
+                deleteTreatmentById();
                 break;
             case EXIT_TREATMENT_MANAGEMENT:
                 printf("Saved data and exiting from treatment menu.\n");
@@ -133,24 +139,25 @@ void addTreatment()
 
     printf("Enter Treatment Name: ");
     scanf(" %[^\n]", treatmentNode->treatmentName);
-    printf("Enter Treatment Cost: ");
+    printf("Enter Cost: ");
     scanf("%d", &treatmentNode->treatmentCost);
-    printf("Enter Treatment Duration (in days): ");
+    printf("Enter Duration (in days): ");
     scanf("%d", &treatmentNode->treatmentDuration);
 
+    treatmentNode->treatmentStatus = 'A';
     treatmentNode->next = NULL;
 
-    insertTreatmentSorted();
+    insertTreatmentSortedByName();
 
     fseek(ft, 0, SEEK_END);
-    fprintf(ft, "%d,%s,%d,%d\n", treatmentNode->treatmentId, treatmentNode->treatmentName, treatmentNode->treatmentCost, treatmentNode->treatmentDuration);
+    fprintf(ft, "%5d,%-99s,%10d,%5d,%c\n", treatmentNode->treatmentId, treatmentNode->treatmentName, treatmentNode->treatmentCost, treatmentNode->treatmentDuration, treatmentNode->treatmentStatus);
     fflush(ft);
     printf("Treatment added successfully and saved to file!\n");
 }
 
-void insertTreatmentSorted()
+void insertTreatmentSortedByName()
 {
-    if (treatmentHead == NULL || strcasecmp(treatmentHead->treatmentName, treatmentNode->treatmentName)>0)
+    if (treatmentHead == NULL || strcmp(treatmentHead->treatmentName, treatmentNode->treatmentName) > 0)
     {
         treatmentNode->next = treatmentHead;
         treatmentHead = treatmentNode;
@@ -158,7 +165,7 @@ void insertTreatmentSorted()
     else
     {
         treatmentTemp = treatmentHead;
-        while (treatmentTemp->next != NULL && strcasecmp(treatmentTemp->next->treatmentName, treatmentNode->treatmentName) <0)
+        while (treatmentTemp->next != NULL && strcmp(treatmentTemp->next->treatmentName, treatmentNode->treatmentName) < 0)
         {
             treatmentTemp = treatmentTemp->next;
         }
@@ -178,23 +185,23 @@ void updateTreatmentDetails()
     {
         if (treatmentTemp->treatmentId == id)
         {
-            printf("Updating details for Treatment ID %d...\n", treatmentTemp->treatmentId);
-            printf("1. Treatment Name\n2. Treatment Cost\n3. Treatment Duration\n");
+            printf("Updating details for %s...\n", treatmentTemp->treatmentName);
+            printf("1. Name\n2. Cost\n3. Duration\n");
             printf("Enter your choice: ");
             scanf("%d", &choice);
 
             switch (choice)
             {
             case UPDATE_TREATMENT_NAME:
-                printf("New Treatment Name: ");
+                printf("New Name: ");
                 scanf(" %[^\n]", treatmentTemp->treatmentName);
                 break;
             case UPDATE_TREATMENT_COST:
-                printf("New Treatment Cost: ");
+                printf("New Cost: ");
                 scanf("%d", &treatmentTemp->treatmentCost);
                 break;
             case UPDATE_TREATMENT_DURATION:
-                printf("New Treatment Duration: ");
+                printf("New Duration (in days): ");
                 scanf("%d", &treatmentTemp->treatmentDuration);
                 break;
             default:
@@ -203,10 +210,9 @@ void updateTreatmentDetails()
             }
 
             printf("Treatment details updated successfully in memory.\n");
-
             rewind(ft);
-            long position;
             char line[256];
+            long position = 0;
             while (fgets(line, sizeof(line), ft))
             {
                 int existingId;
@@ -214,10 +220,59 @@ void updateTreatmentDetails()
 
                 if (existingId == id)
                 {
-                    position = ftell(ft) - strlen(line);
+                    position = (ftell(ft) - 1) - strlen(line);
                     fseek(ft, position, SEEK_SET);
-                    fprintf(ft, ",%s,%d,%d\n", treatmentTemp->treatmentName, treatmentTemp->treatmentCost, treatmentTemp->treatmentDuration);
+
+                    fprintf(ft, "%5d,%-99s,%10d,%5d,%c\n", treatmentTemp->treatmentId, treatmentTemp->treatmentName, treatmentTemp->treatmentCost, treatmentTemp->treatmentDuration, treatmentTemp->treatmentStatus);
+
                     fflush(ft);
+
+                    break;
+                }
+            }
+
+            return;
+        }
+        treatmentTemp = treatmentTemp->next;
+    }
+
+    printf("Treatment with ID %d not found.\n", id);
+}
+void deleteTreatmentById()
+{
+    int id;
+    printf("Enter Treatment ID to delete: ");
+    scanf("%d", &id);
+
+    treatment *treatmentTemp = treatmentHead;
+    while (treatmentTemp != NULL)
+    {
+        if (treatmentTemp->treatmentId == id && treatmentTemp->treatmentStatus)
+        {
+            treatmentTemp->treatmentStatus = 'D'; // Mark as deleted
+            printf("Treatment with ID %d marked as deleted.\n", id);
+
+            rewind(ft); // Move to the beginning of the file
+            char line[256];
+            long position;
+            while (fgets(line, sizeof(line), ft))
+            {
+                int existingId;
+                sscanf(line, "%d,", &existingId);
+
+                if (existingId == id)
+                {
+                    position = (ftell(ft) - 1) - strlen(line);
+                    fseek(ft, position, SEEK_SET);
+
+                    // Update the treatment's record in the file to mark it as deleted
+                    fprintf(ft, "%5d,%-99s,%10d,%5d,%c\n",
+                            treatmentTemp->treatmentId,
+                            treatmentTemp->treatmentName,
+                            treatmentTemp->treatmentCost,
+                            treatmentTemp->treatmentDuration,
+                            'D'); // Marked as deleted in the file
+                    fflush(ft); // Save changes to the file
                     break;
                 }
             }
@@ -229,6 +284,7 @@ void updateTreatmentDetails()
     printf("Treatment with ID %d not found.\n", id);
 }
 
+
 void displayTreatment()
 {
     if (treatmentHead == NULL)
@@ -238,13 +294,18 @@ void displayTreatment()
     }
 
     treatmentTemp = treatmentHead;
+    printf("----treatment Details ----\n");
     while (treatmentTemp != NULL)
     {
-        printf("Treatment ID: %d\n", treatmentTemp->treatmentId);
-        printf("Name: %s\n", treatmentTemp->treatmentName);
-        printf("Cost: %d\n", treatmentTemp->treatmentCost);
-        printf("Duration: %d days\n", treatmentTemp->treatmentDuration);
-        printf("\n");
+        if(treatmentTemp->treatmentStatus == 'A')
+        {
+            printf("Treatment ID: %d\n", treatmentTemp->treatmentId);
+            printf("Name: %s\n", treatmentTemp->treatmentName);
+            printf("Cost: %d\n", treatmentTemp->treatmentCost);
+            printf("Duration: %d days\n", treatmentTemp->treatmentDuration);
+            printf("\n");
+        }
+
         treatmentTemp = treatmentTemp->next;
     }
 }
@@ -258,7 +319,7 @@ void searchByTreatmentId()
     treatmentTemp = treatmentHead;
     while (treatmentTemp != NULL)
     {
-        if (treatmentTemp->treatmentId == id)
+        if (treatmentTemp->treatmentId == id && treatmentTemp->treatmentStatus == 'A')
         {
             printf("--- Treatment Found ---\n");
             printf("Name: %s\n", treatmentTemp->treatmentName);
@@ -281,7 +342,7 @@ void searchByTreatmentName()
     treatmentTemp = treatmentHead;
     while (treatmentTemp != NULL)
     {
-        if (strcasecmp(name, treatmentTemp->treatmentName) == 0)
+        if (strcasecmp(name, treatmentTemp->treatmentName) == 0 && treatmentTemp->treatmentStatus == 'A')
         {
             printf("--- Treatment Found ---\n");
             printf("Treatment ID: %d\n", treatmentTemp->treatmentId);

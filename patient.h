@@ -1,16 +1,17 @@
 #ifndef PATIENT_H
 #define PATIENT_H
 
-typedef struct patient
-{
+
+typedef struct patient {
     int patientId;
-    char patientName[100];
+    char patientName[50];
     char patientGender[10];
     int patientAge;
-    char patientAddress[100];
-    char patientContactNumber[15];
-    char patientEmergencyContactNumber[15];
-    struct patient *next;
+    char patientAddress[50];
+    char patientContactNumber[20];
+    char patientEmergencyContactNumber[20];
+    char patientStatus;  // 'A' for Active, 'D' for Deleted
+    struct patient* next;
 } patient;
 
 
@@ -22,6 +23,7 @@ enum PatientManagementMenu
     SEARCH_PATIENT_BY_ID,
     SEARCH_PATIENT_BY_NAME,
     SORT_BY_PATIENT_ID,
+    DELETE_PATIENT_ID,
     EXIT_PATIENT_MANAGEMENT
 } ;
 enum PatientUpdateDetail
@@ -38,13 +40,14 @@ enum PatientUpdateDetail
 
 void loadPatientDataFromFile();
 void loginAsPatientManagementUser();
-void registerPatient();
+void registerPatient();//insert by name while registration only
 void displayPatientDetails();
 void updatePatientDetails();
 void searchByPatientId();
 void searchByPatientName();
 void sortPatientsById();
-void insertPatientSorted();
+void deletePatientById();
+void insertPatientSortedByName();
 
 
 #endif // PATIENT_H

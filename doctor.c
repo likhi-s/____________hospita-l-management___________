@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include "doctor.h"
 
-#define USER_ID "doctor_user"
-#define USER_PASSWORD "doctor@123"
+#define USER_ID "123"
+#define USER_PASSWORD "123"
 #define FILE_NAME "doctors.txt"
 
 doctor *doctorHead = NULL;
@@ -26,10 +26,14 @@ void loadDoctorDataFromFile()
     while (fgets(line, sizeof(line), fd))
     {
         doctorNode = (doctor *)malloc(sizeof(doctor));
-        if (sscanf(line, "%d,%99[^,],%19[^,],%f,%14[^,],%d,%49[^\n]", &doctorNode->doctorId, doctorNode->doctorName, doctorNode->doctorSpecialization, &doctorNode->doctorConsultationFee, doctorNode->doctorContactNumber,&doctorNode->doctorExperience, doctorNode->doctorQualification) == 7)
+        if (sscanf(line, "%5d,%49[^,],%19[^,],%10.2f,%14[^,],%3d,%49[^\n],%c", &doctorNode->doctorId, doctorNode->doctorName, doctorNode->doctorSpecialization, &doctorNode->doctorConsultationFee, doctorNode->doctorContactNumber,&doctorNode->doctorExperience, doctorNode->doctorQualification ,doctorNode->doctorStatus)== 8)
         {
-            doctorNode->next = NULL;
-            insertDoctorSorted(doctorNode);
+            if(doctorNode->doctorStatus == 'A')
+            {
+                doctorNode->next = NULL;
+                insertDoctorSortedByName();
+            }
+
         }
         else
         {
@@ -66,7 +70,7 @@ void loginAsDoctorManagementUser()
         while (true)
         {
             printf("\n--- Doctor Management System ---\n");
-            printf("1. Add doctor\n2. Update doctor details\n3. Display Doctors\n4. Search Doctor by ID\n5. Search Doctor by Specialization\n6. Sort By ID\n7. Exit from Doctor Menu\n");
+            printf("1. Add doctor\n2. Update doctor details\n3. Display Doctors\n4. Search Doctor by ID\n5. Search Doctor by Specialization\n6. Sort By ID\n7. delete doctor record by ID\n8. Exit from Doctor Menu\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -89,6 +93,9 @@ void loginAsDoctorManagementUser()
                 break;
             case SORT_DOCTORS_BY_ID:
                 sortDoctorsById();
+                break;
+            case DELETE_DOCTOR_BY_ID:
+                deleteDoctorById();
                 break;
             case EXIT_DOCTOR_MANAGEMENT:
                 printf("Saved data and exiting from doctor menu.\n");
@@ -144,17 +151,18 @@ void addDoctor()
     printf("Enter Qualification: ");
     scanf(" %[^\n]", doctorNode->doctorQualification);
 
+    doctorNode->doctorStatus = 'A';
     doctorNode->next = NULL;
 
-    insertDoctorSorted(doctorNode);
+    insertDoctorSortedByName();
 
     fseek(fd, 0, SEEK_END);
-    fprintf(fd, "%d,%s,%s,%.2f,%s,%d,%s\n", doctorNode->doctorId, doctorNode->doctorName, doctorNode->doctorSpecialization, doctorNode->doctorConsultationFee, doctorNode->doctorContactNumber, doctorNode->doctorExperience, doctorNode->doctorQualification);
+    fprintf(fd, "%5d,%-49s,%-19s,%10.2f,%-14s,%3d,%-49s,%c\n", doctorNode->doctorId, doctorNode->doctorName, doctorNode->doctorSpecialization, doctorNode->doctorConsultationFee, doctorNode->doctorContactNumber, doctorNode->doctorExperience, doctorNode->doctorQualification, doctorNode->doctorStatus);
     fflush(fd);
     printf("Doctor added successfully and saved to file!\n");
 }
 
-void insertDoctorSorted()
+void insertDoctorSortedByName()
 {
     if (doctorHead == NULL || strcmp(doctorHead->doctorName, doctorNode->doctorName) > 0)
     {
@@ -183,7 +191,7 @@ void updateDoctorDetails()
     doctorTemp = doctorHead;
     while (doctorTemp != NULL)
     {
-        if (doctorTemp->doctorId == id)
+        if (doctorTemp->doctorId == id && doctorTemp->doctorStatus == 'A')
         {
             printf("Updating details for Dr. %s...\n", doctorTemp->doctorName);
             printf("1. Name\n2. Specialization\n3. Consultation Fee\n4. Contact Number\n5. Experience\n6. Qualification\n");
@@ -232,10 +240,10 @@ void updateDoctorDetails()
 
                 if (existingId == id)
                 {
-                    position = ftell(fd) -strlen(line);
+                    position = (ftell(fd)-1) -strlen(line);
                     fseek(fd, position, SEEK_SET);
 
-                    fprintf(fd, ",%s,%s,%.2f,%s,%d,%s\n", doctorTemp->doctorId, doctorTemp->doctorName, doctorTemp->doctorSpecialization, doctorTemp->doctorConsultationFee, doctorTemp->doctorContactNumber, doctorTemp->doctorExperience, doctorTemp->doctorQualification);
+                    fprintf(fd, "%5d,%-49s,%-19s,%10.2f,%-14s,%3d,%-49s,%c\n", doctorTemp->doctorId, doctorTemp->doctorName, doctorTemp->doctorSpecialization, doctorTemp->doctorConsultationFee, doctorTemp->doctorContactNumber, doctorTemp->doctorExperience, doctorTemp->doctorQualification, doctorTemp->doctorStatus);
 
                     fflush(fd);
 
@@ -251,6 +259,43 @@ void updateDoctorDetails()
     printf("Doctor with ID %d not found.\n", id);
 }
 
+void deleteDoctorById()
+{
+    int id;
+    printf("Enter Doctor ID to delete: ");
+    scanf("%d", &id);
+
+    doctorTemp = doctorHead;
+    while (doctorTemp != NULL)
+    {
+        if (doctorTemp->doctorId == id)
+        {
+            doctorTemp->doctorStatus = 'D';
+            printf("Doctor with ID %d marked as deleted.\n", id);
+
+            rewind(fd);
+            long position;
+            char line[256];
+            while (fgets(line, sizeof(line), fd))
+            {
+                int existingId;
+                sscanf(line, "%d,", &existingId);
+                if (existingId == id)
+                {
+                    position = (ftell(fd) - 1) - strlen(line);
+                    fseek(fd, position, SEEK_SET);
+                    fprintf(fd, "%5d,%-49s,%-19s,%10.2f,%-14s,%3d,%-49s,%c\n", doctorTemp->doctorId, doctorTemp->doctorName, doctorTemp->doctorSpecialization, doctorTemp->doctorConsultationFee, doctorTemp->doctorContactNumber, doctorTemp->doctorExperience, doctorTemp->doctorQualification,  'D');
+                    fflush(fd);
+                    break;
+                }
+            }
+            return;
+        }
+        doctorTemp = doctorTemp->next;
+    }
+    printf("Doctor with ID %d not found.\n", id);
+}
+
 void searchByDoctorId()
 {
     int id;
@@ -260,7 +305,7 @@ void searchByDoctorId()
     doctorTemp = doctorHead;
     while (doctorTemp != NULL)
     {
-        if (doctorTemp->doctorId == id)
+        if (doctorTemp->doctorId == id && doctorTemp->doctorStatus == 'A')
         {
             printf("--- Doctor Found ---\n");
             printf("Name: %s\n", doctorTemp->doctorName);
@@ -291,7 +336,7 @@ void searchByDoctorSpecialization()
 
     while (doctorTemp != NULL)
     {
-        if (strcasecmp(specialization, doctorTemp->doctorSpecialization) == 0)
+        if (strcasecmp(specialization, doctorTemp->doctorSpecialization) == 0 && doctorTemp->doctorStatus == 'A')
         {
             printf("--- Doctor Found ---\n");
             printf("Doctor ID: %d\n", doctorTemp->doctorId);
@@ -325,14 +370,18 @@ void displayDoctorDetails()
     doctorTemp = doctorHead;
     while (doctorTemp != NULL)
     {
-        printf("Doctor ID: %d\n", doctorTemp->doctorId);
-        printf("Name: %s\n", doctorTemp->doctorName);
-        printf("Specialization: %s\n", doctorTemp->doctorSpecialization);
-        printf("Consultation Fee: %.2f\n", doctorTemp->doctorConsultationFee);
-        printf("Contact Number: %s\n", doctorTemp->doctorContactNumber);
-        printf("Experience: %d years\n", doctorTemp->doctorExperience);
-        printf("Qualification: %s\n", doctorTemp->doctorQualification);
-        printf("\n");
+        if(doctorTemp->doctorStatus == 'A')
+        {
+            printf("Doctor ID: %d\n", doctorTemp->doctorId);
+            printf("Name: %s\n", doctorTemp->doctorName);
+            printf("Specialization: %s\n", doctorTemp->doctorSpecialization);
+            printf("Consultation Fee: %.2f\n", doctorTemp->doctorConsultationFee);
+            printf("Contact Number: %s\n", doctorTemp->doctorContactNumber);
+            printf("Experience: %d years\n", doctorTemp->doctorExperience);
+            printf("Qualification: %s\n", doctorTemp->doctorQualification);
+            printf("\n");
+        }
+
         doctorTemp = doctorTemp->next;
     }
 }

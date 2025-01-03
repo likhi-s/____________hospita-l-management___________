@@ -3,11 +3,12 @@
 typedef struct pharmacy
 {
     int medicineId;
-    char medicineName[100];
+    char medicineName[50];
     float medicineCost;
     int medicineStockQuantity;
     char medicineType[20];// tablet/injection
-    char medicineDosage[100];
+    char medicineDosage[20];
+    char medicineStatus;
     struct pharmacy *next;
 }pharmacy;
 
@@ -21,6 +22,7 @@ enum PharmacyMenuOption
     SEARCH_MEDICINE_BY_NAME,
     CHECK_STOCK,
     SORT_BY_MEDICINE_ID,
+    DELETE_BY_MEDICINE_ID,
     EXIT_PHARMACY_MANAGEMENT
 };
 enum MedicineDetailOption
@@ -40,5 +42,6 @@ void searchByMedicineId();
 void searchByMedicineName();
 void checkMedicineStock();
 void sortByMedicineId();
+void deleteMedicineById();
 
 #endif // PHARMACY_H

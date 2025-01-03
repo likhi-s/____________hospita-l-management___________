@@ -6,6 +6,7 @@
 #include "treatment.h"
 #include "pharmacy.h"
 #include "room.h"
+#include "bill.h"
 #include "menu.h"
 
 
@@ -31,6 +32,7 @@ void menu()
         {
         case LOGIN_AS_PATIENT_MANAGEMENT_USER:
             loginAsPatientManagementUser();
+            break;
         case LOGIN_AS_DOCTOR_MANAGEMENT_USER:
             loginAsDoctorManagementUser();
             break;
@@ -45,6 +47,9 @@ void menu()
             break;
         case LOGIN_AS_ROOM_MANAGEMENT_USER:
             loginAsRoomManagementUser();
+            break;
+        case LOGIN_AS_BILL_MANAGEMENT_USER:
+            loginAsBillManagementUser();
             break;
         case EXIT_FROM_ADMINISTRATIVE_MENU:
             printf("Exiting the administrative Menu\n");

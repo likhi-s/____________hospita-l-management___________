@@ -11,9 +11,10 @@ typedef struct bill
     float roomFee;
     float totalBillAmount;
     char billDate[20];
+    char billStatus;
     struct bill *next;
-}Bill;
-extern Bill *billHead;
+} bill;
+
 
 enum BillMenuOption
 {
@@ -22,6 +23,8 @@ enum BillMenuOption
     DISPLAY_BILL_DETAILS,
     SEARCH_BILL_BY_PATIENT_ID,
     CALCULATE_BILL,
+    SORT_BILL_BY_BILL_ID,
+    DELETE_BILL_BY_ID,
     EXIT_BILL_MANAGEMENT
 };
 enum BillUpdateChoice
@@ -42,6 +45,7 @@ void updateBillDetails();
 void displayBillDetails();
 void searchBillByPatientId();
 void calculateBill();
-
+void deleteBillById();
+void sortByBillId();
 
 #endif // BILL_H

@@ -4,9 +4,9 @@
 #include <stdbool.h>
 #include "staff.h"
 
-#define USER_ID "staff_user"
-#define USER_PASSWORD "staff@123"
-#define FILE_NAME "staff.txt"
+#define STAFF_FILE_NAME "staff.txt"
+#define STAFF_USER_ID "456"
+#define STAFF_USER_PASSWORD "456"
 
 staff *staffHead = NULL;
 staff *staffTemp;
@@ -26,10 +26,13 @@ void loadStaffDataFromFile()
     while (fgets(line, sizeof(line), fs))
     {
         staffNode = (staff *)malloc(sizeof(staff));
-        if (sscanf(line, "%d,%99[^,],%49[^,],%9[^,],%f,%14[^\n]", &staffNode->staffId, staffNode->staffName, staffNode->staffRole, staffNode->staffShift, &staffNode->staffSalary, staffNode->staffContactNumber) == 6)
+        if (sscanf(line, "%5d,%49[^,],%19[^,],%9[^,],%10f,%14[^,],%c", &staffNode->staffId, staffNode->staffName, staffNode->staffRole, staffNode->staffShift, &staffNode->staffSalary, staffNode->staffContactNumber, &staffNode->staffStatus) == 7)
         {
-            staffNode->next = NULL;
-            insertStaffSorted(staffNode);
+            if (staffNode->staffStatus == 'A')
+            {
+                staffNode->next = NULL;
+                insertStaffSortedByName();
+            }
         }
         else
         {
@@ -41,10 +44,10 @@ void loadStaffDataFromFile()
 
 void loginAsStaffManagementUser()
 {
-    fs = fopen(FILE_NAME, "r+");
+    fs = fopen(STAFF_FILE_NAME, "r+");
     if (fs == NULL)
     {
-        fs = fopen(FILE_NAME, "w+");
+        fs = fopen(STAFF_FILE_NAME, "w+");
         if (fs == NULL)
         {
             printf("Unable to open or create file.\n");
@@ -59,14 +62,14 @@ void loginAsStaffManagementUser()
     printf("User Password:\n");
     scanf(" %[^\n]", userPass);
 
-    if (strcmp(userId, USER_ID) == 0 && strcmp(userPass, USER_PASSWORD) == 0)
+    if (strcmp(userId, STAFF_USER_ID) == 0 && strcmp(userPass, STAFF_USER_PASSWORD) == 0)
     {
         loadStaffDataFromFile();
         int option;
         while (true)
         {
             printf("\n--- Staff Management System ---\n");
-            printf("1. Add staff\n2. Update staff details\n3. Display Staff\n4. Search Staff by ID\n5. Search Staff by Role\n6. Sort By ID\n7. Exit from Staff Menu\n");
+            printf("1. Add staff\n2. Update staff details\n3. Display Staff\n4. Search Staff by ID\n5. Search Staff by Role\n6. Sort By ID\n7. Delete Staff Record by ID\n8. Exit from Staff Menu\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -89,6 +92,9 @@ void loginAsStaffManagementUser()
                 break;
             case SORT_BY_STAFF_ID:
                 sortByStaffId();
+                break;
+            case DELETE_STAFF_BY_ID:
+                deleteStaffById();
                 break;
             case EXIT_STAFF_MANAGEMENT:
                 printf("Saved data and exiting from staff menu.\n");
@@ -133,27 +139,27 @@ void addStaff()
 
     printf("Enter Staff Name: ");
     scanf(" %[^\n]", staffNode->staffName);
-    printf("Enter Staff Role (e.g., Nurse, Technician, Receptionist): ");
+    printf("Enter Role: ");
     scanf(" %[^\n]", staffNode->staffRole);
-    printf("Enter Staff Shift (Day/Night): ");
-    scanf("%s", staffNode->staffShift);
-    printf("Enter Staff Salary: ");
+    printf("Enter Shift (Day/Night): ");
+    scanf(" %[^\n]", staffNode->staffShift);
+    printf("Enter Salary: ");
     scanf("%f", &staffNode->staffSalary);
-    printf("Enter Staff Contact Number: ");
+    printf("Enter Contact Number: ");
     scanf("%s", staffNode->staffContactNumber);
 
-
+    staffNode->staffStatus = 'A';
     staffNode->next = NULL;
 
-    insertStaffSorted(staffNode);
+    insertStaffSortedByName();
 
     fseek(fs, 0, SEEK_END);
-    fprintf(fs, "%d,%s,%s,%s,%.2f,%s\n", staffNode->staffId, staffNode->staffName, staffNode->staffRole, staffNode->staffShift, staffNode->staffSalary, staffNode->staffContactNumber);
+    fprintf(fs, "%5d,%-49s,%-19s,%-9s,%10.2f,%-14s,%c\n", staffNode->staffId, staffNode->staffName, staffNode->staffRole, staffNode->staffShift, staffNode->staffSalary, staffNode->staffContactNumber, staffNode->staffStatus);
     fflush(fs);
     printf("Staff added successfully and saved to file!\n");
 }
 
-void insertStaffSorted()
+void insertStaffSortedByName()
 {
     if (staffHead == NULL || strcmp(staffHead->staffName, staffNode->staffName) > 0)
     {
@@ -171,6 +177,7 @@ void insertStaffSorted()
         staffTemp->next = staffNode;
     }
 }
+
 void updateStaffDetails()
 {
     int id, choice;
@@ -180,7 +187,7 @@ void updateStaffDetails()
     staffTemp = staffHead;
     while (staffTemp != NULL)
     {
-        if (staffTemp->staffId == id)
+        if (staffTemp->staffId == id && staffTemp->staffStatus == 'A')
         {
             printf("Updating details for %s...\n", staffTemp->staffName);
             printf("1. Name\n2. Role\n3. Shift\n4. Salary\n5. Contact Number\n");
@@ -198,7 +205,7 @@ void updateStaffDetails()
                 scanf(" %[^\n]", staffTemp->staffRole);
                 break;
             case UPDATE_STAFF_SHIFT:
-                printf("New Shift (day/night): ");
+                printf("New Shift: ");
                 scanf(" %[^\n]", staffTemp->staffShift);
                 break;
             case UPDATE_STAFF_SALARY:
@@ -215,11 +222,9 @@ void updateStaffDetails()
             }
 
             printf("Staff details updated successfully in memory.\n");
-            fseek(fs, 0, SEEK_SET);
-
-            long position = 0;
+            rewind(fs);
             char line[256];
-
+            long position = 0;
             while (fgets(line, sizeof(line), fs))
             {
                 int existingId;
@@ -227,15 +232,14 @@ void updateStaffDetails()
 
                 if (existingId == id)
                 {
-                    position = ftell(fs) - strlen(line);
+                    position = (ftell(fs) - 1) - strlen(line);
                     fseek(fs, position, SEEK_SET);
 
-                    fprintf(fs, ",%s,%s,%s,%.2f,%s\n", staffTemp->staffName,
-                            staffTemp->staffRole, staffTemp->staffShift, staffTemp->staffSalary, staffTemp->staffContactNumber);
+                    fprintf(fs, "%5d,%-49s,%-19s,%-9s,%10.2f,%-14s,%c\n", staffTemp->staffId, staffTemp->staffName, staffTemp->staffRole, staffTemp->staffShift, staffTemp->staffSalary, staffTemp->staffContactNumber, staffTemp->staffStatus);
 
                     fflush(fs);
-                    printf("Staff details updated successfully in file.\n");
-                    return;
+
+                    break;
                 }
             }
 
@@ -247,16 +251,54 @@ void updateStaffDetails()
     printf("Staff with ID %d not found.\n", id);
 }
 
+
+void deleteStaffById()
+{
+    int id;
+    printf("Enter Staff ID to delete: ");
+    scanf("%d", &id);
+
+    staffTemp = staffHead;
+    while (staffTemp != NULL)
+    {
+        if (staffTemp->staffId == id)
+        {
+            staffTemp->staffStatus = 'D';
+            printf("Staff with ID %d marked as deleted.\n", id);
+
+            rewind(fs);
+            long position;
+            char line[256];
+            while (fgets(line, sizeof(line), fs))
+            {
+                int existingId;
+                sscanf(line, "%d,", &existingId);
+                if (existingId == id)
+                {
+                    position = (ftell(fs) - 1) - strlen(line);
+                    fseek(fs, position, SEEK_SET);
+                    fprintf(fs, "%5d,%-49s,%-19s,%-9s,%10.2f,%-14s,%c\n", staffTemp->staffId, staffTemp->staffName, staffTemp->staffRole, staffTemp->staffShift, staffTemp->staffSalary, staffTemp->staffContactNumber, 'D');
+                    fflush(fs);
+                    break;
+                }
+            }
+            return;
+        }
+        staffTemp = staffTemp->next;
+    }
+    printf("Staff with ID %d not found.\n", id);
+}
+
 void searchByStaffId()
 {
     int id;
     printf("Enter Staff ID to search: ");
     scanf("%d", &id);
-    int searchIdFound = 0;
+
     staffTemp = staffHead;
     while (staffTemp != NULL)
     {
-        if (staffTemp->staffId == id)
+        if (staffTemp->staffId == id && staffTemp->staffStatus == 'A')
         {
             printf("--- Staff Found ---\n");
             printf("Name: %s\n", staffTemp->staffName);
@@ -265,29 +307,25 @@ void searchByStaffId()
             printf("Salary: %.2f\n", staffTemp->staffSalary);
             printf("Contact Number: %s\n", staffTemp->staffContactNumber);
             printf("\n");
-            searchIdFound = 1;
-            break;
+            return;
         }
         staffTemp = staffTemp->next;
     }
-    if (!searchIdFound)
-    {
-        printf("Staff with ID %d not found.\n", id);
-    }
+    printf("Staff with ID %d not found.\n", id);
 }
 
 void searchByStaffRole()
 {
-    char role[50];
+    char role[20];
     printf("Enter Staff Role to search: ");
-    scanf(" %[^]", role);
+    scanf(" %[^\n]", role);
 
     staffTemp = staffHead;
-    int searchRoleFound = 0;
+    int found = 0;
 
     while (staffTemp != NULL)
     {
-        if (strcasecmp(role, staffTemp->staffRole) == 0)
+        if (strcasecmp(role, staffTemp->staffRole) == 0 && staffTemp->staffStatus == 'A')
         {
             printf("--- Staff Found ---\n");
             printf("Staff ID: %d\n", staffTemp->staffId);
@@ -297,15 +335,14 @@ void searchByStaffRole()
             printf("Salary: %.2f\n", staffTemp->staffSalary);
             printf("Contact Number: %s\n", staffTemp->staffContactNumber);
             printf("\n");
-            searchRoleFound = 1;
-            break;
+            found = 1;
         }
         staffTemp = staffTemp->next;
     }
 
-    if (!searchRoleFound)
+    if (!found)
     {
-        printf("Staff with Role '%s' not found.\n", role);
+        printf("No staff found with role: %s\n", role);
     }
 }
 
@@ -313,23 +350,28 @@ void displayStaffDetails()
 {
     if (staffHead == NULL)
     {
-        printf("No staff members found.\n");
+        printf("No available staff to display.\n");
         return;
     }
 
     staffTemp = staffHead;
+    printf("--- Staff Details ---\n");
     while (staffTemp != NULL)
     {
-        printf("Staff ID: %d\n", staffTemp->staffId);
-        printf("Name: %s\n", staffTemp->staffName);
-        printf("Role: %s\n", staffTemp->staffRole);
-        printf("Shift: %s\n", staffTemp->staffShift);
-        printf("Salary: %.2f\n", staffTemp->staffSalary);
-        printf("Contact Number: %s\n", staffTemp->staffContactNumber);
-        printf("\n");
+        if (staffTemp->staffStatus == 'A')
+        {
+            printf("Staff ID: %d\n", staffTemp->staffId);
+            printf("Name: %s\n", staffTemp->staffName);
+            printf("Role: %s\n", staffTemp->staffRole);
+            printf("Shift: %s\n", staffTemp->staffShift);
+            printf("Salary: %.2f\n", staffTemp->staffSalary);
+            printf("Contact Number: %s\n", staffTemp->staffContactNumber);
+            printf("\n");
+        }
         staffTemp = staffTemp->next;
     }
 }
+
 
 void sortByStaffId()
 {
