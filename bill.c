@@ -70,7 +70,7 @@ void loginAsBillManagementUser()
         while (1)
         {
             printf("\n--- Bill Management System ---\n");
-            printf("1. Add Bill\n2. Update Bill Details\n3. Display Bills\n4. Search Bill by Patient ID\n5. Calculate Bill\n6. Sort Bills by ID\n7. Delete Bill Record by ID\n8. Exit\n");
+            printf("1. Add Bill\n2. Update Bill Details\n3. Display Bills\n4. Search Bill by Patient ID\n5. Calculate Bill\n6. Sort Bills by ID\n7. Delete Bill Record by ID\n8. Display Deleted Records\n9. Exit\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -96,6 +96,9 @@ void loginAsBillManagementUser()
                 break;
             case DELETE_BILL_BY_ID:
                 deleteBillById();
+                break;
+            case DISPLAY_DELETED_BILL_RECORDS:
+                displayDeletedRoomRecords();
                 break;
             case EXIT_BILL_MANAGEMENT:
                 printf("Exiting bill management menu.\n");
@@ -517,4 +520,38 @@ void sortByBillId()
         sortedList = sortedList->next;
         free(temp);
     }
+}
+void displayDeletedRoomRecords()
+{
+    if (billHead == NULL)
+    {
+        printf("No bills found.\n");
+        return;
+    }
+
+    billTemp = billHead;
+
+    printf("--- Deleted Bill Records ---\n");
+
+    // Traverse the linked list and print details of deleted bills
+    while (billTemp != NULL)
+    {
+        if (billTemp->billStatus == 'D')  // Check if the status is 'D' for deleted
+        {
+            printf("Bill ID: %d\n", billTemp->billId);
+            printf("Patient ID: %d\n", billTemp->patientId);
+            printf("Treatment ID: %d\n", billTemp->treatmentId);
+            printf("Consultation Fee: %.2f\n", billTemp->consultationFee);
+            printf("Pharmacy Fee: %.2f\n", billTemp->pharmacyFee);
+            printf("Room Fee: %.2f\n", billTemp->roomFee);
+            printf("Total Amount: %.2f\n", billTemp->totalBillAmount);
+            printf("Bill Date: %s\n", billTemp->billDate);
+            printf("Bill Status: %c\n", billTemp->billStatus);
+            printf("\n");
+        }
+        billTemp = billTemp->next;
+    }
+
+
+        printf("No deleted bill records found.\n");
 }

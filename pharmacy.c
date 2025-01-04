@@ -68,7 +68,7 @@ void loginAsPharmacyManagementUser()
         while (true)
         {
             printf("\n--- Pharmacy Management System ---\n");
-            printf("1. Add New Medicine\n2. Update Medicine Details\n3. Display Available Medicines\n4. Search Medicine by ID\n5. Search Medicine by Name\n6. Check Stock\n7. Sort By Medicine ID\n8. Delete Medicine by ID\n9. Exit\n");
+            printf("1. Add New Medicine\n2. Update Medicine Details\n3. Display Available Medicines\n4. Search Medicine by ID\n5. Search Medicine by Name\n6. Check Stock\n7. Sort By Medicine ID\n8. Delete Medicine by ID\n9. Display Deleted Records\n10. Exit\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -97,6 +97,9 @@ void loginAsPharmacyManagementUser()
                 break;
             case DELETE_BY_MEDICINE_ID:
                 deleteMedicineById();
+                break;
+            case DISPLAY_DELETED_MEDICINE_RECORDS:
+                displayDeletedMedicines();
                 break;
             case EXIT_PHARMACY_MANAGEMENT:
                 printf("Saved data and exiting from pharmacy menu.\n");
@@ -490,4 +493,34 @@ void sortByMedicineId()
         printf("\n");
         pharmacyTemp = pharmacyTemp->next;
     }
+}
+void displayDeletedMedicines()
+{
+    if (pharmacyHead == NULL)
+    {
+        printf("No medicines found.\n");
+        return;
+    }
+
+    pharmacyTemp = pharmacyHead;
+
+    printf("--- Deleted Medicine Records ---\n");
+    while (pharmacyTemp != NULL)
+    {
+        if (pharmacyTemp->medicineStatus == 'D')
+        {
+            printf("Medicine ID: %d\n", pharmacyTemp->medicineId);
+            printf("Name: %s\n", pharmacyTemp->medicineName);
+            printf("Cost: %.2f\n", pharmacyTemp->medicineCost);
+            printf("Stock Quantity: %d\n", pharmacyTemp->medicineStockQuantity);
+            printf("Type: %s\n", pharmacyTemp->medicineType);
+            printf("Dosage: %s\n", pharmacyTemp->medicineDosage);
+            printf("Status: Deleted\n");
+            printf("\n");
+        }
+        pharmacyTemp = pharmacyTemp->next;
+    }
+
+        printf("No deleted medicines found.\n");
+
 }

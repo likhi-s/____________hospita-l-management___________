@@ -70,34 +70,34 @@ void loginAsPatientManagementUser()
         while (true)
         {
             printf("\n--- Patient Management System ---\n");
-            printf("1. Register patient\n2. Update patient details\n3. Display Patients by Name\n4. Search Patient by ID\n5. Search Patient by Name\n6. Sort By ID\n7. Delete Patient\n8. Display deleted records\n9. Exit from Patient Menu\n");
+            printf("1. Register patient\n2. Update patient details\n3. Display Patients by Name\n4. Search Patient by ID\n5. Search Patient by Name\n6. Sort By ID\n7. Delete Patient\n8. Display deleted records\n9. Display Deleted Records\n10. Exit from Patient Menu\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
             switch (option)
             {
-            case 1:
+            case REGISTER_PATIENT:
                 registerPatient();
                 break;
-            case 2:
+            case UPDATE_PATIENT_DETAILS:
                 updatePatientDetails();
                 break;
-            case 3:
+            case DISPLAY_AVAILABLE_PATIENTS_BY_NAME:
                 displayPatientDetails();
                 break;
-            case 4:
+            case SEARCH_PATIENT_BY_ID:
                 searchByPatientId();
                 break;
-            case 5:
+            case SEARCH_PATIENT_BY_NAME:
                 searchByPatientName();
                 break;
-            case 6:
+            case SORT_BY_PATIENT_ID:
                 sortPatientsById();
                 break;
-            case 7:
+            case DELETE_PATIENT_ID:
                 deletePatient();
                 break;
-            case 8:
+            case DISPLAY_DELETED_PATIENTS_RECORDS:
                 displayDeletedRecords();
                 break;
             case 9:
@@ -233,27 +233,27 @@ void updatePatientDetails()
 
             switch (choice)
             {
-            case 1:
+            case UPDATE_PATIENT_NAME:
                 printf("New Name: ");
                 scanf(" %[^\n]", patientTemp->patientName);
                 break;
-            case 2:
+            case UPDATE_PATIENT_GENDER:
                 printf("New Gender: ");
                 scanf("%s", patientTemp->patientGender);
                 break;
-            case 3:
+            case UPDATE_PATIENT_AGE:
                 printf("New Age: ");
                 scanf("%d", &patientTemp->patientAge);
                 break;
-            case 4:
+            case UPDATE_PATIENT_ADDRESS:
                 printf("New Address: ");
                 scanf(" %[^\n]", patientTemp->patientAddress);
                 break;
-            case 5:
+            case UPDATE_PATIENT_CONTACT_NUMBER:
                 printf("New Contact Number: ");
                 scanf("%s", patientTemp->patientContactNumber);
                 break;
-            case 6:
+            case UPDATE_PATIENT_EMERGENCY_CONTACT_NUMBER:
                 printf("New Emergency Contact: ");
                 scanf("%s", patientTemp->patientEmergencyContactNumber);
                 break;
@@ -499,7 +499,6 @@ void displayDeletedRecords()
 
     printf("--- Deleted Patient Records ---\n");
 
-    // Traverse the linked list and print details of deleted records
     while (patientTemp != NULL)
     {
         if (patientTemp->patientStatus == 'D')  // Check if the status is 'D' for deleted
@@ -516,9 +515,6 @@ void displayDeletedRecords()
         patientTemp = patientTemp->next;
     }
 
-    // If no deleted records found, display a message at the end of the loop
-    if (patientHead == patientTemp) // This checks if no deleted patient was found
-    {
         printf("No deleted patient records found.\n");
-    }
+
 }

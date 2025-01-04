@@ -23,6 +23,7 @@ enum PharmacyMenuOption
     CHECK_STOCK,
     SORT_BY_MEDICINE_ID,
     DELETE_BY_MEDICINE_ID,
+    DISPLAY_DELETED_MEDICINE_RECORDS,
     EXIT_PHARMACY_MANAGEMENT
 };
 enum MedicineDetailOption
