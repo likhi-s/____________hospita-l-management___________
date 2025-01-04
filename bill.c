@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 #include "bill.h"
 
-#define USER_ID "123"
-#define USER_PASSWORD "123"
-#define FILE_NAME "bills.txt"
+#define BILL_FILE_NAME "bill.txt"
+#define BILL_USER_ID "123"
+#define BILL_USER_PASSWORD "123"
 
 bill *billHead = NULL;
 bill *billTemp;
 bill *billNode;
 FILE *fb;
+
 void loadBillDataFromFile()
 {
     if (fb == NULL)
@@ -25,14 +25,16 @@ void loadBillDataFromFile()
     while (fgets(line, sizeof(line), fb))
     {
         billNode = (bill *)malloc(sizeof(bill));
-        // Adjusted format specifiers to handle extra spaces in the input file
-        if (sscanf(line, "%5d,%5d,%5d,%lf,%lf,%lf,%lf,%19s,%c",
+        if (sscanf(line, "%5d,%5d,%5d,%10f,%10f,%10f,%10f,%19[^,],%c",
                    &billNode->billId, &billNode->patientId, &billNode->treatmentId,
                    &billNode->consultationFee, &billNode->pharmacyFee, &billNode->roomFee,
                    &billNode->totalBillAmount, billNode->billDate, &billNode->billStatus) == 9)
         {
-            billNode->next = NULL;
-            insertBillSortedByBillId();
+            if (billNode->billStatus == 'A')
+            {
+                billNode->next = NULL;
+                insertBillSortedById();
+            }
         }
         else
         {
@@ -42,13 +44,12 @@ void loadBillDataFromFile()
     printf("Bill data loaded from file.\n");
 }
 
-
 void loginAsBillManagementUser()
 {
-    fb = fopen(FILE_NAME, "r+");
+    fb = fopen(BILL_FILE_NAME, "r+");
     if (fb == NULL)
     {
-        fb = fopen(FILE_NAME, "w+");
+        fb = fopen(BILL_FILE_NAME, "w+");
         if (fb == NULL)
         {
             printf("Unable to open or create file.\n");
@@ -63,14 +64,14 @@ void loginAsBillManagementUser()
     printf("User Password:\n");
     scanf(" %[^\n]", userPass);
 
-    if (strcmp(userId, USER_ID) == 0 && strcmp(userPass, USER_PASSWORD) == 0)
+    if (strcmp(userId, BILL_USER_ID) == 0 && strcmp(userPass, BILL_USER_PASSWORD) == 0)
     {
         loadBillDataFromFile();
         int option;
-        while (true)
+        while (1)
         {
             printf("\n--- Bill Management System ---\n");
-            printf("1. Add bill\n2. Update bill details\n3. Display Bills\n4. Search Bill by Patient ID\n5. Calculate Bill\n6. Sort Bills by Bill ID\n7. Delete bill record by ID\n8. Exit from Bill Menu\n");
+            printf("1. Add Bill\n2. Update Bill Details\n3. Display Bills\n4. Search Bill by Patient ID\n5. Calculate Bill\n6. Sort Bills by ID\n7. Delete Bill Record by ID\n8. Exit\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -92,13 +93,13 @@ void loginAsBillManagementUser()
                 calculateBill();
                 break;
             case SORT_BILL_BY_BILL_ID:
-                sortBillsByBillId();
+                sortByBillId();
                 break;
             case DELETE_BILL_BY_ID:
                 deleteBillById();
                 break;
             case EXIT_BILL_MANAGEMENT:
-                printf("Saved data and exiting from bill menu.\n");
+                printf("Exiting bill management menu.\n");
                 fclose(fb);
                 return;
             default:
@@ -148,24 +149,25 @@ void addBill()
     scanf("%f", &billNode->pharmacyFee);
     printf("Enter Room Fee: ");
     scanf("%f", &billNode->roomFee);
-
-    billNode->totalBillAmount = billNode->consultationFee + billNode->pharmacyFee + billNode->roomFee;
-
-    printf("Enter Bill Date (YYYY-MM-DD): ");
+    printf("Enter Bill Date (DD-MM-YYYY): ");
     scanf(" %[^\n]", billNode->billDate);
 
+    billNode->totalBillAmount = billNode->consultationFee + billNode->pharmacyFee + billNode->roomFee;
     billNode->billStatus = 'A';
     billNode->next = NULL;
 
-    insertBillSortedByBillId();
+    insertBillSortedById();
 
     fseek(fb, 0, SEEK_END);
-    fprintf(fb, "%5d,%5d,%5d,%10.2f,%10.2f,%10.2f,%10.2f,%19s,%c\n", billNode->billId, billNode->patientId, billNode->treatmentId, billNode->consultationFee, billNode->pharmacyFee, billNode->roomFee, billNode->totalBillAmount, billNode->billDate, billNode->billStatus);
+    fprintf(fb, "%5d,%5d,%5d,%10.2f,%10.2f,%10.2f,%10.2f,%-19s,%c\n",
+            billNode->billId, billNode->patientId, billNode->treatmentId,
+            billNode->consultationFee, billNode->pharmacyFee, billNode->roomFee,
+            billNode->totalBillAmount, billNode->billDate, billNode->billStatus);
     fflush(fb);
     printf("Bill added successfully and saved to file!\n");
 }
 
-void insertBillSortedByBillId()
+void insertBillSortedById()
 {
     if (billHead == NULL || billHead->billId > billNode->billId)
     {
@@ -193,36 +195,36 @@ void updateBillDetails()
     billTemp = billHead;
     while (billTemp != NULL)
     {
-        if (billTemp->billId == id && billTemp->billStatus == 'A')
+        if (billTemp->billId == id && billTemp->billStatus == 'A') // Check if the bill is active
         {
-            printf("Updating details for Bill ID %d...\n", billTemp->billId);
+            printf("Updating details for Bill ID %d...\n", id);
             printf("1. Patient ID\n2. Treatment ID\n3. Consultation Fee\n4. Pharmacy Fee\n5. Room Fee\n6. Bill Date\n");
             printf("Enter your choice: ");
             scanf("%d", &choice);
 
             switch (choice)
             {
-            case UPDATE_BILL_WITH_PATIENT_ID:
+            case 1:
                 printf("New Patient ID: ");
                 scanf("%d", &billTemp->patientId);
                 break;
-            case UPDATE_BILL_WITH_TREATMENT_ID:
+            case 2:
                 printf("New Treatment ID: ");
                 scanf("%d", &billTemp->treatmentId);
                 break;
-            case UPDATE_BILL_WITH_CONSULTATION_FEE:
+            case 3:
                 printf("New Consultation Fee: ");
                 scanf("%f", &billTemp->consultationFee);
                 break;
-            case UPDATE_BILL_WITH_PHARMACY_FEE:
+            case 4:
                 printf("New Pharmacy Fee: ");
                 scanf("%f", &billTemp->pharmacyFee);
                 break;
-            case UPDATE_BILL_WITH_ROOM_FEE:
+            case 5:
                 printf("New Room Fee: ");
                 scanf("%f", &billTemp->roomFee);
                 break;
-            case UPDATE_BILL_DATE:
+            case 6:
                 printf("New Bill Date (YYYY-MM-DD): ");
                 scanf(" %[^\n]", billTemp->billDate);
                 break;
@@ -231,11 +233,16 @@ void updateBillDetails()
                 return;
             }
 
+            // Recalculate the total bill amount
             billTemp->totalBillAmount = billTemp->consultationFee + billTemp->pharmacyFee + billTemp->roomFee;
+
             printf("Bill details updated successfully in memory.\n");
-            rewind(fb);
+
+            // Update the bill details in the file
+            rewind(fb); // Start from the beginning of the file
             char line[256];
-            long position = 0;
+            long position;
+
             while (fgets(line, sizeof(line), fb))
             {
                 int existingId;
@@ -243,19 +250,104 @@ void updateBillDetails()
 
                 if (existingId == id)
                 {
-                    position = (ftell(fb)-1) -strlen(line);
-                    fseek(fb, position, SEEK_SET);
-                    fprintf(fb, "%5d,%5d,%5d,%10.2f,%10.2f,%10.2f,%10.2f,%19s,%c\n", billTemp->billId, billTemp->patientId, billTemp->treatmentId, billTemp->consultationFee, billTemp->pharmacyFee, billTemp->roomFee, billTemp->totalBillAmount, billTemp->billDate, billTemp->billStatus);
-                    fflush(fb);
+                    position = (ftell(fb)-1) - strlen(line); // Find the position to overwrite
+                    fseek(fb, position, SEEK_SET); // Set the file pointer to the correct position
+
+                    fprintf(fb,  "%5d,%5d,%5d,%10.2f,%10.2f,%10.2f,%10.2f,%-19s,%c\n",
+                            billTemp->billId,
+                            billTemp->patientId,
+                            billTemp->treatmentId,
+                            billTemp->consultationFee,
+                            billTemp->pharmacyFee,
+                            billTemp->roomFee,
+                            billTemp->totalBillAmount,
+                            billTemp->billDate,
+                            billTemp->billStatus);
+
+                    fflush(fb); // Ensure data is written to the file
+                    printf("Bill details updated successfully in the file.\n");
                     break;
                 }
             }
 
             return;
         }
-        billTemp = billTemp->next;
+        billTemp = billTemp->next; // Move to the next bill in the linked list
     }
 
+    printf("Bill with ID %d not found.\n", id);
+}
+
+
+void displayBillDetails()
+{
+    if (billHead == NULL)
+    {
+        printf("No available bills to display.\n");
+        return;
+    }
+
+    billTemp = billHead;
+    printf("--- Bill Details ---\n");
+    while (billTemp != NULL)
+    {
+        if (billTemp->billStatus == 'A')
+        {
+            printf("Bill ID: %d\n", billTemp->billId);
+            printf("Patient ID: %d\n", billTemp->patientId);
+            printf("Treatment ID: %d\n", billTemp->treatmentId);
+            printf("Consultation Fee: %.2f\n", billTemp->consultationFee);
+            printf("Pharmacy Fee: %.2f\n", billTemp->pharmacyFee);
+            printf("Room Fee: %.2f\n", billTemp->roomFee);
+            printf("Total Amount: %.2f\n", billTemp->totalBillAmount);
+            printf("Bill Date: %s\n", billTemp->billDate);
+            printf("\n");
+        }
+        billTemp = billTemp->next;
+    }
+}
+
+void searchBillByPatientId()
+{
+    int patientId;
+    printf("Enter Patient ID to search: ");
+    scanf("%d", &patientId);
+
+    billTemp = billHead;
+    while (billTemp != NULL)
+    {
+        if (billTemp->patientId == patientId && billTemp->billStatus == 'A')
+        {
+            printf("--- Bill Found ---\n");
+            printf("Bill ID: %d\n", billTemp->billId);
+            printf("Treatment ID: %d\n", billTemp->treatmentId);
+            printf("Total Amount: %.2f\n", billTemp->totalBillAmount);
+            printf("Bill Date: %s\n", billTemp->billDate);
+            printf("\n");
+            return;
+        }
+        billTemp = billTemp->next;
+    }
+    printf("No bills found for Patient ID %d.\n", patientId);
+}
+
+void calculateBill()
+{
+    int id;
+    printf("Enter Bill ID to calculate: ");
+    scanf("%d", &id);
+
+    billTemp = billHead;
+    while (billTemp != NULL)
+    {
+        if (billTemp->billId == id && billTemp->billStatus == 'A')
+        {
+            billTemp->totalBillAmount = billTemp->consultationFee + billTemp->pharmacyFee + billTemp->roomFee;
+            printf("Bill ID: %d, Total Amount: %.2f\n", billTemp->billId, billTemp->totalBillAmount);
+            return;
+        }
+        billTemp = billTemp->next;
+    }
     printf("Bill with ID %d not found.\n", id);
 }
 
@@ -272,7 +364,6 @@ void deleteBillById()
         {
             billTemp->billStatus = 'D';
             printf("Bill with ID %d marked as deleted.\n", id);
-
             rewind(fb);
             long position;
             char line[256];
@@ -282,109 +373,34 @@ void deleteBillById()
                 sscanf(line, "%d,", &existingId);
                 if (existingId == id)
                 {
-                    position = (ftell(fb) - 1) - strlen(line);
+                    position = (ftell(fb)-1) - strlen(line);
                     fseek(fb, position, SEEK_SET);
-                    fprintf(fb, "%5d,%5d,%5d,%10.2f,%10.2f,%10.2f,%10.2f,%19s,%c\n", billTemp->billId, billTemp->patientId, billTemp->treatmentId, billTemp->consultationFee, billTemp->pharmacyFee, billTemp->roomFee, billTemp->totalBillAmount, billTemp->billDate, 'D');
+                    fprintf(fb,  "%5d,%5d,%5d,%10.2f,%10.2f,%10.2f,%10.2f,%-19s,%c\n",
+                            billTemp->billId,
+                            billTemp->patientId,
+                            billTemp->treatmentId,
+                            billTemp->consultationFee,
+                            billTemp->pharmacyFee,
+                            billTemp->roomFee,
+                            billTemp->totalBillAmount,
+                            billTemp->billDate,
+                            'D');
                     fflush(fb);
                     break;
                 }
             }
             return;
         }
+
         billTemp = billTemp->next;
     }
     printf("Bill with ID %d not found.\n", id);
 }
-void displayBillDetails()
-{
-    if (billHead == NULL)
-    {
-        printf("No bills available to display.\n");
-        return;
-    }
-
-    printf("--- Bill Details ---\n");
-    billTemp = billHead;
-    while (billTemp != NULL)
-    {
-        if(billTemp->billStatus == 'A')
-        {
-            printf("Bill ID: %d\n", billTemp->billId);
-            printf("Patient ID: %d\n", billTemp->patientId);
-            printf("Treatment ID: %d\n", billTemp->treatmentId);
-            printf("Consultation Fee: %.2f\n", billTemp->consultationFee);
-            printf("Pharmacy Fee: %.2f\n", billTemp->pharmacyFee);
-            printf("Room Fee: %.2f\n", billTemp->roomFee);
-            printf("Total Bill Amount: %.2f\n", billTemp->totalBillAmount);
-            printf("Bill Date: %s\n", billTemp->billDate);
-            printf("Bill Status: %c\n", billTemp->billStatus);
-            printf("----------------------\n");
-        }
-
-        billTemp = billTemp->next;
-    }
-}
-
-
-void searchBillByPatientId()
-{
-    int id;
-    printf("Enter Patient ID to search: ");
-    scanf("%d", &id);
-    int searchIdFound = 0;
-    billTemp = billHead;
-    while (billTemp != NULL)
-    {
-        if (billTemp->patientId == id && billTemp->billStatus == 'A')
-        {
-            printf("--- Bill Found ---\n");
-            printf("Bill ID: %d\n", billTemp->billId);
-            printf("Patient ID: %d\n", billTemp->patientId);
-            printf("Treatment ID: %d\n", billTemp->treatmentId);
-            printf("Consultation Fee: %.2f\n", billTemp->consultationFee);
-            printf("Pharmacy Fee: %.2f\n", billTemp->pharmacyFee);
-            printf("Room Fee: %.2f\n", billTemp->roomFee);
-            printf("Total Bill: %.2f\n", billTemp->totalBillAmount);
-            printf("Bill Date: %s\n", billTemp->billDate);
-            printf("\n");
-            searchIdFound = 1;
-            break;
-        }
-        billTemp = billTemp->next;
-    }
-    if (!searchIdFound)
-    {
-        printf("Bill for Patient ID %d not found.\n", id);
-    }
-}
-
-void calculateBill()
-{
-    int patientId, treatmentId;
-    float consultationFee, pharmacyFee, roomFee, totalAmount;
-
-    printf("Enter Patient ID: ");
-    scanf("%d", &patientId);
-
-    printf("Enter Treatment ID: ");
-    scanf("%d", &treatmentId);
-
-    printf("Enter Consultation Fee: ");
-    scanf("%f", &consultationFee);
-
-    printf("Enter Pharmacy Fee: ");
-    scanf("%f", &pharmacyFee);
-
-    printf("Enter Room Fee: ");
-    scanf("%f", &roomFee);
-
-    totalAmount = consultationFee + pharmacyFee + roomFee;
-    printf("Total Bill Amount: %.2f\n", totalAmount);
-}
 
 
 
-void sortBillsByBillId()
+
+void sortByBillId()
 {
     if (billHead == NULL)
     {
