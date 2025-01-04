@@ -67,7 +67,7 @@ void loginAsRoomManagementUser()
         while (true)
         {
             printf("\n--- Room Management System ---\n");
-            printf("1. Add New Room\n2. Update Room Details\n3. Display Available Rooms\n4. Search Room by ID\n5. Search Room by Type\n6. Check Room Availability\n7. Sort By Room ID\n8. Delete Room by ID\n9. Exit\n");
+            printf("1. Add New Room\n2. Update Room Details\n3. Display Available Rooms\n4. Search Room by ID\n5. Search Room by Type\n6. Check Room Availability\n7. Sort By Room ID\n8. Delete Room by ID\n9. Display Deleted Records\n10. Exit\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -96,6 +96,9 @@ void loginAsRoomManagementUser()
                 break;
             case DELETE_ROOM_BY_ID:
                 deleteRoomById();
+                break;
+            case DISPLAY_DELETED_ROOM_RECORDS:
+                displayDeletedRooms();
                 break;
             case EXIT_ROOM_MANAGEMENT:
                 printf("Saved data and exiting from room management menu.\n");
@@ -515,4 +518,31 @@ void sortByRoomId()
         sortedList = sortedList->next;
         free(temp);
     }
+}
+void displayDeletedRooms()
+{
+    if (roomHead == NULL)
+    {
+        printf("No rooms to display.\n");
+        return;
+    }
+
+    roomTemp = roomHead;
+    printf("--- Deleted Room Records ---\n");
+    while (roomTemp != NULL)
+    {
+        if (roomTemp->roomStatus == 'D')
+        {
+            printf("Room ID: %d\n", roomTemp->roomId);
+            printf("Type: %s\n", roomTemp->roomType);
+            printf("Bed Count: %d\n", roomTemp->bedCount);
+            printf("Available Beds: %d\n", roomTemp->availableBeds);
+            printf("Bed Status: %s\n", roomTemp->bedStatus);
+            printf("Room Fee: %.2f\n", roomTemp->roomFee);
+            printf("\n");
+        }
+        roomTemp = roomTemp->next;
+    }
+    printf("No deleted rooms found found.\n");
+
 }

@@ -67,7 +67,7 @@ void loginAsStaffManagementUser()
         while (true)
         {
             printf("\n--- Staff Management System ---\n");
-            printf("1. Add staff\n2. Update staff details\n3. Display Staff\n4. Search Staff by ID\n5. Search Staff by Role\n6. Sort By ID\n7. Delete Staff Record by ID\n8. Exit from Staff Menu\n");
+            printf("1. Add staff\n2. Update staff details\n3. Display Staff\n4. Search Staff by ID\n5. Search Staff by Role\n6. Sort By ID\n7. Delete Staff Record by ID\n8. Display Deleted Records\n9. Exit from Staff Menu\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -93,6 +93,9 @@ void loginAsStaffManagementUser()
                 break;
             case DELETE_STAFF_BY_ID:
                 deleteStaffById();
+                break;
+            case DISPLAY_DELETED_STAFF_RECORDS:
+                displayDeletedStaffDetails();
                 break;
             case EXIT_STAFF_MANAGEMENT:
                 printf("Saved data and exiting from staff menu.\n");
@@ -480,4 +483,29 @@ void sortByStaffId()
         free(staffTemp);
     }
 
+}
+void displayDeletedStaffDetails()
+{
+    if (staffHead == NULL)
+    {
+        printf("No deleted staff records to display.\n");
+        return;
+    }
+
+    staffTemp = staffHead;
+    printf("--- Deleted Staff Details ---\n");
+    while (staffTemp != NULL)
+    {
+        if (staffTemp->staffStatus == 'D')
+        {
+            printf("Staff ID: %d\n", staffTemp->staffId);
+            printf("Name: %s\n", staffTemp->staffName);
+            printf("Role: %s\n", staffTemp->staffRole);
+            printf("Shift: %s\n", staffTemp->staffShift);
+            printf("Salary: %.2f\n", staffTemp->staffSalary);
+            printf("Contact Number: %s\n", staffTemp->staffContactNumber);
+            printf("\n");
+        }
+        staffTemp = staffTemp->next;
+    }
 }

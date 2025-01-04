@@ -68,7 +68,7 @@ void loginAsTreatmentAndPriceManagementUser()
         while (true)
         {
             printf("\n--- Treatment and Price Management System ---\n");
-            printf("1. Add Treatment\n2. Update Treatment Details\n3. Display Treatments\n4. Search Treatment by ID\n5. Search Treatment by Name\n6. Sort By ID\n7. Delete Treatment Record by ID\n8. Exit\n");
+            printf("1. Add Treatment\n2. Update Treatment Details\n3. Display Treatments\n4. Search Treatment by ID\n5. Search Treatment by Name\n6. Sort By ID\n7. Delete Treatment Record by ID\n8. Display Deleted Records\n9. Exit\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -94,6 +94,9 @@ void loginAsTreatmentAndPriceManagementUser()
                 break;
             case DELETE_TREATMENT_BY_ID:
                 deleteTreatmentById();
+                break;
+            case DISPLAY_DELETED_TREATMENT_RECORDS:
+                displayDeletedTreatmentRecords();
                 break;
             case EXIT_TREATMENT_MANAGEMENT:
                 printf("Saved data and exiting from treatment menu.\n");
@@ -467,5 +470,30 @@ void sortTreatmentById()
         treatment *temp = sortedList;
         sortedList = sortedList->next;
         free(temp);
+    }
+}
+void displayDeletedTreatmentRecords()
+{
+    if (treatmentHead == NULL)
+    {
+        printf("No deleted treatments found.\n");
+        return;
+    }
+
+    treatmentTemp = treatmentHead;
+    printf("---- Deleted Treatment Records ----\n");
+    while (treatmentTemp != NULL)
+    {
+        if (treatmentTemp->treatmentStatus == 'D')
+        {
+            printf("Treatment ID: %d\n", treatmentTemp->treatmentId);
+            printf("Name: %s\n", treatmentTemp->treatmentName);
+            printf("Cost: %d\n", treatmentTemp->treatmentCost);
+            printf("Duration: %d days\n", treatmentTemp->treatmentDuration);
+            printf("Status: Deleted\n");
+            printf("\n");
+        }
+
+        treatmentTemp = treatmentTemp->next;
     }
 }

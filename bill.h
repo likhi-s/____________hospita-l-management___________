@@ -25,6 +25,7 @@ enum BillMenuOption
     CALCULATE_BILL,
     SORT_BILL_BY_BILL_ID,
     DELETE_BILL_BY_ID,
+    DISPLAY_DELETED_BILL_RECORDS,
     EXIT_BILL_MANAGEMENT
 };
 enum BillUpdateChoice

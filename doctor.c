@@ -69,7 +69,7 @@ void loginAsDoctorManagementUser()
         while (true)
         {
             printf("\n--- Doctor Management System ---\n");
-            printf("1. Add doctor\n2. Update doctor details\n3. Display Doctors\n4. Search Doctor by ID\n5. Search Doctor by Specialization\n6. Sort By ID\n7. delete doctor record by ID\n8. Exit from Doctor Menu\n");
+            printf("1. Add doctor\n2. Update doctor details\n3. Display Doctors\n4. Search Doctor by ID\n5. Search Doctor by Specialization\n6. Sort By ID\n7. delete doctor record by ID\n8. Display Deleted Records\n9. Exit from Doctor Menu\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -96,6 +96,8 @@ void loginAsDoctorManagementUser()
             case DELETE_DOCTOR_BY_ID:
                 deleteDoctorById();
                 break;
+            case DISPLAY_DELETED_DOCTORS_RECORD:
+                displayDeletedDoctorDetails();
             case EXIT_DOCTOR_MANAGEMENT:
                 printf("Saved data and exiting from doctor menu.\n");
                 fclose(fd);
@@ -494,4 +496,33 @@ void sortDoctorsById()
         sortedList = sortedList->next;
         free(doctorTemp);
     }
+}
+void displayDeletedDoctorDetails()
+{
+    if (doctorHead == NULL)
+    {
+        printf("No doctors found.\n");
+        return;
+    }
+
+    doctorTemp = doctorHead;
+    while (doctorTemp != NULL)
+    {
+        if (doctorTemp->doctorStatus == 'D')
+        {
+            printf("Doctor ID: %d\n", doctorTemp->doctorId);
+            printf("Name: %s\n", doctorTemp->doctorName);
+            printf("Specialization: %s\n", doctorTemp->doctorSpecialization);
+            printf("Consultation Fee: %.2f\n", doctorTemp->doctorConsultationFee);
+            printf("Contact Number: %s\n", doctorTemp->doctorContactNumber);
+            printf("Experience: %d years\n", doctorTemp->doctorExperience);
+            printf("Qualification: %s\n", doctorTemp->doctorQualification);
+            printf("Status: Deleted\n");
+            printf("\n");
+        }
+        doctorTemp = doctorTemp->next;
+    }
+
+        printf("No deleted doctors found.\n");
+
 }

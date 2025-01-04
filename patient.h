@@ -24,6 +24,7 @@ enum PatientManagementMenu
     SEARCH_PATIENT_BY_NAME,
     SORT_BY_PATIENT_ID,
     DELETE_PATIENT_ID,
+    DISPLAY_DELETED_PATIENTS_RECORDS,
     EXIT_PATIENT_MANAGEMENT
 } ;
 enum PatientUpdateDetail
