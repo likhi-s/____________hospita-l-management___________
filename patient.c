@@ -31,15 +31,10 @@ void loadPatientDataFromFile()
                    &patientNode->patientAge, patientNode->patientAddress, patientNode->patientContactNumber,
                    patientNode->patientEmergencyContactNumber, &patientNode->patientStatus) == 8)
         {
-            if (patientNode->patientStatus == 'A')
-            {
+
                 patientNode->next = NULL;
                 insertPatientSorted();
-            }
-            else
-            {
-                free(patientNode);
-            }
+
         }
         else
         {
@@ -75,7 +70,7 @@ void loginAsPatientManagementUser()
         while (true)
         {
             printf("\n--- Patient Management System ---\n");
-            printf("1. Register patient\n2. Update patient details\n3. Display Patients by Name\n4. Search Patient by ID\n5. Search Patient by Name\n6. Sort By ID\n7. Delete Patient\n8. Exit from Patient Menu\n");
+            printf("1. Register patient\n2. Update patient details\n3. Display Patients by Name\n4. Search Patient by ID\n5. Search Patient by Name\n6. Sort By ID\n7. Delete Patient\n8. Display deleted records\n9. Exit from Patient Menu\n");
             printf("Enter your option: ");
             scanf("%d", &option);
 
@@ -103,6 +98,9 @@ void loginAsPatientManagementUser()
                 deletePatient();
                 break;
             case 8:
+                displayDeletedRecords();
+                break;
+            case 9:
                 printf("Saved data and exiting from patient menu\n");
                 fclose(fp);
                 return;
@@ -489,5 +487,38 @@ void sortPatientsById()
         free(temp);
     }
 }
+void displayDeletedRecords()
+{
+    if (patientHead == NULL)
+    {
+        printf("No patients found.\n");
+        return;
+    }
 
+    patientTemp = patientHead;
 
+    printf("--- Deleted Patient Records ---\n");
+
+    // Traverse the linked list and print details of deleted records
+    while (patientTemp != NULL)
+    {
+        if (patientTemp->patientStatus == 'D')  // Check if the status is 'D' for deleted
+        {
+            printf("Patient ID: %d\n", patientTemp->patientId);
+            printf("Name: %s\n", patientTemp->patientName);
+            printf("Gender: %s\n", patientTemp->patientGender);
+            printf("Age: %d\n", patientTemp->patientAge);
+            printf("Address: %s\n", patientTemp->patientAddress);
+            printf("Contact Number: %s\n", patientTemp->patientContactNumber);
+            printf("Emergency Contact Number: %s\n", patientTemp->patientEmergencyContactNumber);
+            printf("\n");
+        }
+        patientTemp = patientTemp->next;
+    }
+
+    // If no deleted records found, display a message at the end of the loop
+    if (patientHead == patientTemp) // This checks if no deleted patient was found
+    {
+        printf("No deleted patient records found.\n");
+    }
+}

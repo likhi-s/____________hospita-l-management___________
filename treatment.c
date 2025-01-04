@@ -28,11 +28,10 @@ void loadTreatmentDataFromFile()
         treatmentNode = (treatment *)malloc(sizeof(treatment));
         if (sscanf(line, "%5d,%99[^,],%10d,%5d,%c", &treatmentNode->treatmentId, treatmentNode->treatmentName, &treatmentNode->treatmentCost, &treatmentNode->treatmentDuration, &treatmentNode->treatmentStatus) == 5)
         {
-            if (treatmentNode->treatmentStatus == 'A')
-            {
+
                 treatmentNode->next = NULL;
                 insertTreatmentSortedByName();
-            }
+
         }
         else
         {

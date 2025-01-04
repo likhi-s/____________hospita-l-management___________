@@ -28,11 +28,10 @@ void loadPharmacyDataFromFile()
         pharmacyNode = (pharmacy *)malloc(sizeof(pharmacy));
         if (sscanf(line, "%5d,%49[^,],%10f,%10d,%19[^,],%19[^,],%c", &pharmacyNode->medicineId, pharmacyNode->medicineName, &pharmacyNode->medicineCost, &pharmacyNode->medicineStockQuantity, pharmacyNode->medicineType, pharmacyNode->medicineDosage, &pharmacyNode->medicineStatus) == 7)
         {
-            if (pharmacyNode->medicineStatus == 'A')
-            {
+
                 pharmacyNode->next = NULL;
                 insertMedicineSortedByName();
-            }
+
         }
         else
         {
