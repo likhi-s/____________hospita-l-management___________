@@ -28,11 +28,9 @@ void loadStaffDataFromFile()
         staffNode = (staff *)malloc(sizeof(staff));
         if (sscanf(line, "%5d,%49[^,],%19[^,],%9[^,],%10f,%14[^,],%c", &staffNode->staffId, staffNode->staffName, staffNode->staffRole, staffNode->staffShift, &staffNode->staffSalary, staffNode->staffContactNumber, &staffNode->staffStatus) == 7)
         {
-            if (staffNode->staffStatus == 'A')
-            {
                 staffNode->next = NULL;
                 insertStaffSortedByName();
-            }
+
         }
         else
         {

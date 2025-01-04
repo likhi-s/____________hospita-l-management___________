@@ -26,11 +26,12 @@ void loadRoomDataFromFile()
     while (fgets(line, sizeof(line), rm))
     {
         roomNode = (room *)malloc(sizeof(room));
-        if (sscanf(line, "%5d,%9[^,],%d,%d,%9[^,],%f,%c", &roomNode->roomId, roomNode->roomType, &roomNode->bedCount, &roomNode->availableBeds, roomNode->bedStatus, &roomNode->roomFee, &roomNode->roomStatus) == 7)
+        if(sscanf(line, "%5d,%-9s,%d,%d,%-9s,%f,%c\n", roomNode->roomId, roomNode->roomType, roomNode->bedCount, roomNode->availableBeds, roomNode->bedStatus, roomNode->roomFee, roomNode->roomStatus)==7)
         {
             roomNode->next = NULL;
             insertRoomSortedById();
         }
+
         else
         {
             free(roomNode);

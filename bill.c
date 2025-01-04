@@ -30,11 +30,10 @@ void loadBillDataFromFile()
                    &billNode->consultationFee, &billNode->pharmacyFee, &billNode->roomFee,
                    &billNode->totalBillAmount, billNode->billDate, &billNode->billStatus) == 9)
         {
-            if (billNode->billStatus == 'A')
-            {
+
                 billNode->next = NULL;
                 insertBillSortedById();
-            }
+
         }
         else
         {

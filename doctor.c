@@ -28,11 +28,10 @@ void loadDoctorDataFromFile()
         doctorNode = (doctor *)malloc(sizeof(doctor));
         if (sscanf(line, "%5d,%49[^,],%19[^,],%10.2f,%14[^,],%3d,%49[^\n],%c", &doctorNode->doctorId, doctorNode->doctorName, doctorNode->doctorSpecialization, &doctorNode->doctorConsultationFee, doctorNode->doctorContactNumber,&doctorNode->doctorExperience, doctorNode->doctorQualification ,doctorNode->doctorStatus)== 8)
         {
-            if(doctorNode->doctorStatus == 'A')
-            {
+
                 doctorNode->next = NULL;
                 insertDoctorSortedByName();
-            }
+
 
         }
         else
