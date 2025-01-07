@@ -25,15 +25,10 @@ void loadBillDataFromFile()
     while (fgets(line, sizeof(line), fb))
     {
         billNode = (bill *)malloc(sizeof(bill));
-        if (sscanf(line, "%5d,%5d,%5d,%10f,%10f,%10f,%10f,%19[^,],%c",
-                   &billNode->billId, &billNode->patientId, &billNode->treatmentId,
-                   &billNode->consultationFee, &billNode->pharmacyFee, &billNode->roomFee,
-                   &billNode->totalBillAmount, billNode->billDate, &billNode->billStatus) == 9)
+        if (sscanf(line, "%5d,%5d,%5d,%10f,%10f,%10f,%10f,%19[^,],%c", &billNode->billId, &billNode->patientId, &billNode->treatmentId, &billNode->consultationFee, &billNode->pharmacyFee, &billNode->roomFee, &billNode->totalBillAmount, billNode->billDate, &billNode->billStatus) == 9)
         {
-
-                billNode->next = NULL;
-                insertBillSortedById();
-
+            billNode->next = NULL;
+            insertBillSortedById();
         }
         else
         {
@@ -161,12 +156,10 @@ void addBill()
     insertBillSortedById();
 
     fseek(fb, 0, SEEK_END);
-    fprintf(fb, "%5d,%5d,%5d,%10.2f,%10.2f,%10.2f,%10.2f,%-19s,%c\n",
-            billNode->billId, billNode->patientId, billNode->treatmentId,
-            billNode->consultationFee, billNode->pharmacyFee, billNode->roomFee,
-            billNode->totalBillAmount, billNode->billDate, billNode->billStatus);
-    fflush(fb);
+    fprintf(fb, "%5d,%5d,%-49s,%5d,%10.2f,%10.2f,%10.2f,%10.2f,%-19s,%c\n", billNode->billId, billNode->patientId,billNode->patientName, billNode->treatmentId, billNode->consultationFee, billNode->pharmacyFee, billNode->roomFee, billNode->totalBillAmount, billNode->billDate, billNode->billStatus);
     printf("Bill added successfully and saved to file!\n");
+
+    fflush(fb);
 }
 
 void insertBillSortedById()
@@ -191,13 +184,15 @@ void insertBillSortedById()
 void updateBillDetails()
 {
     int id, choice;
+    int found =0;
+
     printf("Enter Bill ID to update: ");
     scanf("%d", &id);
 
     billTemp = billHead;
     while (billTemp != NULL)
     {
-        if (billTemp->billId == id && billTemp->billStatus == 'A') // Check if the bill is active
+        if (billTemp->billId == id && billTemp->billStatus == 'A')
         {
             printf("Updating details for Bill ID %d...\n", id);
             printf("1. Patient ID\n2. Treatment ID\n3. Consultation Fee\n4. Pharmacy Fee\n5. Room Fee\n6. Bill Date\n");
@@ -243,7 +238,6 @@ void updateBillDetails()
             rewind(fb);
             char line[256];
             long position=0;
-            int found =0;
 
             while (fgets(line, sizeof(line), fb))
             {
@@ -253,8 +247,8 @@ void updateBillDetails()
                 if (existingId == id)
                 {
                     found =1;
-                    position = ftell(fb) - strlen(line); // Find the position to overwrite
-                    fseek(fb, position, SEEK_SET); // Set the file pointer to the correct position
+                    position = ftell(fb) - strlen(line);
+                    fseek(fb, position, SEEK_SET);
 
                     switch(choice)
                     {
@@ -298,16 +292,16 @@ void updateBillDetails()
                     break;
                 }
             }
-            if (!found)
-            {
-                printf("Bill with ID %d not found.\n", id);
-            }
+
             return;
         }
-        billTemp = billTemp->next; // Move to the next bill in the linked list
+        billTemp = billTemp->next;
     }
 
-    printf("Bill with ID %d not found.\n", id);
+    if (!found)
+    {
+        printf("Bill with ID %d not found.\n", id);
+    }
 }
 
 
@@ -318,13 +312,14 @@ void displayBillDetails()
         printf("No available bills to display.\n");
         return;
     }
-
+    int found =0;
     billTemp = billHead;
     printf("--- Bill Details ---\n");
     while (billTemp != NULL)
     {
         if (billTemp->billStatus == 'A')
         {
+            found =1;
             printf("Bill ID: %d\n", billTemp->billId);
             printf("Patient ID: %d\n", billTemp->patientId);
             printf("Treatment ID: %d\n", billTemp->treatmentId);
@@ -337,11 +332,16 @@ void displayBillDetails()
         }
         billTemp = billTemp->next;
     }
+    if(!found)
+    {
+        printf("no bills found\n");
+    }
 }
 
 void searchBillByPatientId()
 {
     int patientId;
+    int found =0;
     printf("Enter Patient ID to search: ");
     scanf("%d", &patientId);
 
@@ -350,6 +350,7 @@ void searchBillByPatientId()
     {
         if (billTemp->patientId == patientId && billTemp->billStatus == 'A')
         {
+            found = 1;
             printf("--- Bill Found ---\n");
             printf("Bill ID: %d\n", billTemp->billId);
             printf("Treatment ID: %d\n", billTemp->treatmentId);
@@ -360,12 +361,17 @@ void searchBillByPatientId()
         }
         billTemp = billTemp->next;
     }
-    printf("No bills found for Patient ID %d.\n", patientId);
+    if(!found)
+    {
+        printf("No bills found for Patient ID %d.\n", patientId);
+
+    }
 }
 
 void calculateBill()
 {
     int id;
+    int found =0;
     printf("Enter Bill ID to calculate: ");
     scanf("%d", &id);
 
@@ -374,18 +380,24 @@ void calculateBill()
     {
         if (billTemp->billId == id && billTemp->billStatus == 'A')
         {
+            found =1;
             billTemp->totalBillAmount = billTemp->consultationFee + billTemp->pharmacyFee + billTemp->roomFee;
             printf("Bill ID: %d, Total Amount: %.2f\n", billTemp->billId, billTemp->totalBillAmount);
             return;
         }
         billTemp = billTemp->next;
     }
-    printf("Bill with ID %d not found.\n", id);
+    if(!found)
+    {
+        printf("Bill with ID %d not found.\n", id);
+
+    }
 }
 
 void deleteBillById()
 {
     int id;
+    int found =0;
     printf("Enter Bill ID to delete: ");
     scanf("%d", &id);
 
@@ -394,8 +406,8 @@ void deleteBillById()
     {
         if (billTemp->billId == id)
         {
+            found =1;
             billTemp->billStatus = 'D';
-            printf("Bill with ID %d marked as deleted.\n", id);
             rewind(fb);
             long position;
             char line[256];
@@ -405,19 +417,13 @@ void deleteBillById()
                 sscanf(line, "%d,", &existingId);
                 if (existingId == id)
                 {
-                    position = (ftell(fb)-1) - strlen(line);
-                    fseek(fb, position, SEEK_SET);
-                    fprintf(fb,  "%5d,%5d,%5d,%10.2f,%10.2f,%10.2f,%10.2f,%-19s,%c\n",
-                            billTemp->billId,
-                            billTemp->patientId,
-                            billTemp->treatmentId,
-                            billTemp->consultationFee,
-                            billTemp->pharmacyFee,
-                            billTemp->roomFee,
-                            billTemp->totalBillAmount,
-                            billTemp->billDate,
-                            'D');
+                    position = ftell(fb) - strlen(line);
+                    fseek(fb, position+81, SEEK_SET);
+                    fprintf(fb, "%c", 'D');
+
+                    printf("Bill with ID %d marked as deleted.\n", id);
                     fflush(fb);
+
                     break;
                 }
             }
@@ -426,7 +432,11 @@ void deleteBillById()
 
         billTemp = billTemp->next;
     }
-    printf("Bill with ID %d not found.\n", id);
+    if(!found)
+    {
+        printf("Bill with ID %d not found.\n", id);
+
+    }
 }
 
 
@@ -442,7 +452,6 @@ void sortByBillId()
 
     bill *tempHead = NULL, *tempTail = NULL, *current = billHead;
 
-    // Copy the linked list to avoid modifying the original list while sorting
     while (current != NULL)
     {
         bill *newNode = (bill *)malloc(sizeof(bill));
@@ -469,7 +478,6 @@ void sortByBillId()
         current = current->next;
     }
 
-    // Function to split the list into two halves
     bill *splitList(bill *head)
     {
         bill *slow = head, *fast = head->next;
@@ -483,7 +491,6 @@ void sortByBillId()
         return middle;
     }
 
-    // Function to merge two sorted lists
     bill *mergeLists(bill *left, bill *right)
     {
         bill dummy;
@@ -508,7 +515,6 @@ void sortByBillId()
         return dummy.next;
     }
 
-    // Merge sort function
     bill *mergeSort(bill *head)
     {
         if (head == NULL || head->next == NULL)
@@ -522,10 +528,8 @@ void sortByBillId()
         return mergeLists(left, right);
     }
 
-    // Sort the bills by ID using merge sort
     bill *sortedList = mergeSort(tempHead);
 
-    // Print the sorted list of bills
     printf("--- Bills Sorted by ID ---\n");
     bill *temp = sortedList;
     while (temp != NULL)
@@ -543,7 +547,6 @@ void sortByBillId()
         temp = temp->next;
     }
 
-    // Free the sorted list after use
     while (sortedList != NULL)
     {
         bill *temp = sortedList;
@@ -553,6 +556,7 @@ void sortByBillId()
 }
 void displayDeletedRoomRecords()
 {
+    int found =0;
     if (billHead == NULL)
     {
         printf("No bills found.\n");
@@ -563,11 +567,11 @@ void displayDeletedRoomRecords()
 
     printf("--- Deleted Bill Records ---\n");
 
-    // Traverse the linked list and print details of deleted bills
     while (billTemp != NULL)
     {
-        if (billTemp->billStatus == 'D')  // Check if the status is 'D' for deleted
+        if (billTemp->billStatus == 'D')
         {
+            found =1;
             printf("Bill ID: %d\n", billTemp->billId);
             printf("Patient ID: %d\n", billTemp->patientId);
             printf("Treatment ID: %d\n", billTemp->treatmentId);
@@ -576,12 +580,12 @@ void displayDeletedRoomRecords()
             printf("Room Fee: %.2f\n", billTemp->roomFee);
             printf("Total Amount: %.2f\n", billTemp->totalBillAmount);
             printf("Bill Date: %s\n", billTemp->billDate);
-            printf("Bill Status: %c\n", billTemp->billStatus);
             printf("\n");
         }
         billTemp = billTemp->next;
     }
-
-
-        printf("No deleted bill records found.\n");
+    if(!found)
+    {
+        printf("Deleted bill records are not available\n");
+    }
 }

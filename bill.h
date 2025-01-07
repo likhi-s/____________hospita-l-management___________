@@ -5,6 +5,7 @@ typedef struct bill
 {
     int billId;
     int patientId;
+    char patientName[50];
     int treatmentId;
     float consultationFee;
     float pharmacyFee;

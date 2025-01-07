@@ -28,10 +28,8 @@ void loadPharmacyDataFromFile()
         pharmacyNode = (pharmacy *)malloc(sizeof(pharmacy));
         if (sscanf(line, "%5d,%49[^,],%10f,%10d,%19[^,],%19[^,],%c", &pharmacyNode->medicineId, pharmacyNode->medicineName, &pharmacyNode->medicineCost, &pharmacyNode->medicineStockQuantity, pharmacyNode->medicineType, pharmacyNode->medicineDosage, &pharmacyNode->medicineStatus) == 7)
         {
-
                 pharmacyNode->next = NULL;
                 insertMedicineSortedByName();
-
         }
         else
         {
@@ -160,8 +158,8 @@ void addMedicine()
 
     fseek(fm, 0, SEEK_END);
     fprintf(fm, "%5d,%-49s,%10f,%10d,%-19s,%-19s,%c\n", pharmacyNode->medicineId, pharmacyNode->medicineName, pharmacyNode->medicineCost, pharmacyNode->medicineStockQuantity, pharmacyNode->medicineType, pharmacyNode->medicineDosage, pharmacyNode->medicineStatus);
-    fflush(fm);
     printf("Medicine added successfully and saved to file!\n");
+    fflush(fm);
 }
 
 void insertMedicineSortedByName()
@@ -185,6 +183,7 @@ void insertMedicineSortedByName()
 void deleteMedicineById()
 {
     int id;
+    int found =0;
     printf("Enter Medicine ID to delete: ");
     scanf("%d", &id);
 
@@ -193,10 +192,9 @@ void deleteMedicineById()
     {
         if (pharmacyTemp->medicineId == id)
         {
-            pharmacyTemp->medicineStatus = 'D'; // Mark the medicine as deleted
-            printf("Medicine with ID %d marked as deleted.\n", id);
+            found =1;
+            pharmacyTemp->medicineStatus = 'D';
 
-            // Rewrite the file to reflect the deletion
             rewind(fm);
             long position;
             char line[256];
@@ -206,11 +204,12 @@ void deleteMedicineById()
                 sscanf(line, "%d,", &existingId);
                 if (existingId == id)
                 {
-                    position = (ftell(fm) - 1) - strlen(line); // Get the position of the line
-                    fseek(fm, position, SEEK_SET);
-                    // Update the line to mark the medicine as deleted
-                    fprintf(fm, "%5d,%-49s,%10f,%10d,%-19s,%-19s,%c\n", pharmacyTemp->medicineId, pharmacyTemp->medicineName, pharmacyTemp->medicineCost, pharmacyTemp->medicineStockQuantity, pharmacyTemp->medicineType, pharmacyTemp->medicineDosage, 'D');
-                    fflush(fm); // Ensure the changes are written immediately
+                    position = ftell(fm) - strlen(line);
+                    fseek(fm, position +117, SEEK_SET);
+                    fprintf(fm, "%c", 'D');
+                    printf("Medicine with ID %d marked as deleted.\n", id);
+
+                    fflush(fm);
                     break;
                 }
             }
@@ -218,11 +217,16 @@ void deleteMedicineById()
         }
         pharmacyTemp = pharmacyTemp->next;
     }
-    printf("Medicine with ID %d not found.\n", id);
+    if(!found)
+    {
+        printf("Medicine with ID %d not found.\n", id);
+
+    }
 }
 void updateMedicineDetails()
 {
     int id, choice;
+    int found =0;
     printf("Enter Medicine ID to update: ");
     scanf("%d", &id);
 
@@ -231,6 +235,7 @@ void updateMedicineDetails()
     {
         if (pharmacyTemp->medicineId == id && pharmacyTemp->medicineStatus)
         {
+            found =1;
             printf("Updating details for %s...\n", pharmacyTemp->medicineName);
             printf("1. Name\n2. Cost\n3. Stock Quantity\n4. Type\n5. Dosage\n");
             printf("Enter your choice (1-5): ");
@@ -268,7 +273,7 @@ void updateMedicineDetails()
             rewind(fm); // Rewind the file pointer to the start of the file
             char line[256];
             long position;
-            int found =0;
+
             while (fgets(line, sizeof(line), fm))
             {
                 int existingId;
@@ -302,6 +307,7 @@ void updateMedicineDetails()
                         fprintf(fm,"%-19s",pharmacyTemp->medicineDosage);
                         break;
                     }
+                    printf("medicine updated successfully in the file\n");
                     fflush(fm);
                     break;
                 }
@@ -314,12 +320,15 @@ void updateMedicineDetails()
         }
         pharmacyTemp = pharmacyTemp->next;
     }
-
-    printf("Medicine with ID %d not found.\n", id);
+    if(!found)
+    {
+        printf("Medicine with ID %d not found.\n",id);
+    }
 }
 
 void displayMedicineDetails()
 {
+    int found =0;
     if (pharmacyHead == NULL)
     {
         printf("No available medicines to display.\n");
@@ -332,6 +341,7 @@ void displayMedicineDetails()
     {
         if (pharmacyTemp->medicineStatus == 'A')
         {
+            found =1;
             printf("Medicine ID: %d\n", pharmacyTemp->medicineId);
             printf("Name: %s\n", pharmacyTemp->medicineName);
             printf("Cost: %.2f\n", pharmacyTemp->medicineCost);
@@ -342,11 +352,17 @@ void displayMedicineDetails()
         }
         pharmacyTemp = pharmacyTemp->next;
     }
+    if(!found)
+    {
+        printf("No available medicines to display.\n");
+
+    }
 }
 
 void searchByMedicineId()
 {
     int id;
+    int found =0;
     printf("Enter Medicine ID to search: ");
     scanf("%d", &id);
 
@@ -355,6 +371,7 @@ void searchByMedicineId()
     {
         if (pharmacyTemp->medicineId == id && pharmacyTemp->medicineStatus == 'A' )
         {
+            found =1;
             printf("--- Medicine Found ---\n");
             printf("Name: %s\n", pharmacyTemp->medicineName);
             printf("Cost: %.2f\n", pharmacyTemp->medicineCost);
@@ -366,12 +383,17 @@ void searchByMedicineId()
         }
         pharmacyTemp = pharmacyTemp->next;
     }
-    printf("Medicine with ID %d not found.\n", id);
+    if(!found)
+    {
+        printf("Medicine with ID %d not found.\n", id);
+
+    }
 }
 
 void searchByMedicineName()
 {
     char name[100];
+    int found =0;
     printf("Enter Medicine Name to search: ");
     scanf(" %[^\n]", name);
 
@@ -380,6 +402,7 @@ void searchByMedicineName()
     {
         if (strcasecmp(name, pharmacyTemp->medicineName) == 0 && pharmacyTemp->medicineStatus == 'A')
         {
+            found =1;
             printf("--- Medicine Found ---\n");
             printf("ID: %d\n", pharmacyTemp->medicineId);
             printf("Cost: %.2f\n", pharmacyTemp->medicineCost);
@@ -391,12 +414,17 @@ void searchByMedicineName()
         }
         pharmacyTemp = pharmacyTemp->next;
     }
-    printf("Medicine with Name '%s' not found.\n", name);
+    if(!found)
+    {
+        printf("Medicine with Name '%s' not found.\n", name);
+
+    }
 }
 
 void checkMedicineStock()
 {
     int id;
+    int found =0;
     printf("Enter Medicine ID to check stock: ");
     scanf("%d", &id);
 
@@ -405,12 +433,17 @@ void checkMedicineStock()
     {
         if (pharmacyTemp->medicineId == id && pharmacyTemp->medicineStatus == 'A')
         {
+            found =1;
             printf("Medicine %s has %d units in stock.\n", pharmacyTemp->medicineName, pharmacyTemp->medicineStockQuantity);
             return;
         }
         pharmacyTemp = pharmacyTemp->next;
     }
-    printf("Medicine with ID %d not found.\n", id);
+    if(!found)
+    {
+        printf("Medicine with ID %d not found.\n", id);
+
+    }
 }
 
 void sortByMedicineId()
@@ -516,6 +549,7 @@ void sortByMedicineId()
 }
 void displayDeletedMedicines()
 {
+    int found =0;
     if (pharmacyHead == NULL)
     {
         printf("No medicines found.\n");
@@ -529,6 +563,7 @@ void displayDeletedMedicines()
     {
         if (pharmacyTemp->medicineStatus == 'D')
         {
+            found =1;
             printf("Medicine ID: %d\n", pharmacyTemp->medicineId);
             printf("Name: %s\n", pharmacyTemp->medicineName);
             printf("Cost: %.2f\n", pharmacyTemp->medicineCost);
@@ -540,7 +575,11 @@ void displayDeletedMedicines()
         }
         pharmacyTemp = pharmacyTemp->next;
     }
-
+    if(!found)
+    {
         printf("No deleted medicines found.\n");
+
+    }
+
 
 }

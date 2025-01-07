@@ -1,6 +1,6 @@
 #ifndef PATIENT_H
 #define PATIENT_H
-
+#include "bill.h"
 
 typedef struct patient {
     int patientId;
@@ -43,6 +43,7 @@ void loadPatientDataFromFile();
 void loginAsPatientManagementUser();
 void registerPatient();//insert by name while registration only
 void displayPatientDetails();
+char* copyingName(bill * billNode,patient *patientNode);
 void updatePatientDetails();
 void searchByPatientId();
 void searchByPatientName();

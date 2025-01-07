@@ -270,10 +270,10 @@ void deleteTreatmentById()
     {
         if (treatmentTemp->treatmentId == id && treatmentTemp->treatmentStatus)
         {
-            treatmentTemp->treatmentStatus = 'D'; // Mark as deleted
-            printf("Treatment with ID %d marked as deleted.\n", id);
+            treatmentTemp->treatmentStatus = 'D';
 
-            rewind(ft); // Move to the beginning of the file
+
+            rewind(ft);
             char line[256];
             long position;
             while (fgets(line, sizeof(line), ft))
@@ -283,17 +283,12 @@ void deleteTreatmentById()
 
                 if (existingId == id)
                 {
-                    position = (ftell(ft) - 1) - strlen(line);
-                    fseek(ft, position, SEEK_SET);
+                    position = ftell(ft) - strlen(line);
+                    fseek(ft, position + 122, SEEK_SET);
 
-                    // Update the treatment's record in the file to mark it as deleted
-                    fprintf(ft, "%5d,%-99s,%10d,%5d,%c\n",
-                            treatmentTemp->treatmentId,
-                            treatmentTemp->treatmentName,
-                            treatmentTemp->treatmentCost,
-                            treatmentTemp->treatmentDuration,
-                            'D'); // Marked as deleted in the file
-                    fflush(ft); // Save changes to the file
+                    fprintf(ft, "%c", 'D');
+                    printf("Treatment with ID %d marked as deleted.\n", id);
+                    fflush(ft);
                     break;
                 }
             }

@@ -293,7 +293,6 @@ void deleteStaffById()
         if (staffTemp->staffId == id)
         {
             staffTemp->staffStatus = 'D';
-            printf("Staff with ID %d marked as deleted.\n", id);
 
             rewind(fs);
             long position;
@@ -304,9 +303,11 @@ void deleteStaffById()
                 sscanf(line, "%d,", &existingId);
                 if (existingId == id)
                 {
-                    position = (ftell(fs) - 1) - strlen(line);
-                    fseek(fs, position, SEEK_SET);
-                    fprintf(fs, "%5d,%-49s,%-19s,%-9s,%10.2f,%-14s,%c\n", staffTemp->staffId, staffTemp->staffName, staffTemp->staffRole, staffTemp->staffShift, staffTemp->staffSalary, staffTemp->staffContactNumber, 'D');
+                    position = ftell(fs) - strlen(line);
+                    fseek(fs, position + 111, SEEK_SET);
+                    fprintf(fs, "%c", 'D');
+                    printf("Staff with ID %d marked as deleted.\n", id);
+
                     fflush(fs);
                     break;
                 }
