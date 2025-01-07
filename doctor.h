@@ -40,7 +40,6 @@ enum DoctorUpdateDetail
 };
 
 
-
 void loginAsDoctorManagementUser();
 void addDoctor();
 void updateDoctorDetails();

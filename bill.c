@@ -206,27 +206,27 @@ void updateBillDetails()
 
             switch (choice)
             {
-            case 1:
+            case UPDATE_BILL_WITH_PATIENT_ID:
                 printf("New Patient ID: ");
                 scanf("%d", &billTemp->patientId);
                 break;
-            case 2:
+            case UPDATE_BILL_WITH_TREATMENT_ID:
                 printf("New Treatment ID: ");
                 scanf("%d", &billTemp->treatmentId);
                 break;
-            case 3:
+            case UPDATE_BILL_WITH_CONSULTATION_FEE:
                 printf("New Consultation Fee: ");
                 scanf("%f", &billTemp->consultationFee);
                 break;
-            case 4:
+            case UPDATE_BILL_WITH_PHARMACY_FEE:
                 printf("New Pharmacy Fee: ");
                 scanf("%f", &billTemp->pharmacyFee);
                 break;
-            case 5:
+            case UPDATE_BILL_WITH_ROOM_FEE:
                 printf("New Room Fee: ");
                 scanf("%f", &billTemp->roomFee);
                 break;
-            case 6:
+            case UPDATE_BILL_DATE:
                 printf("New Bill Date (YYYY-MM-DD): ");
                 scanf(" %[^\n]", billTemp->billDate);
                 break;
@@ -235,15 +235,15 @@ void updateBillDetails()
                 return;
             }
 
-            // Recalculate the total bill amount
             billTemp->totalBillAmount = billTemp->consultationFee + billTemp->pharmacyFee + billTemp->roomFee;
 
             printf("Bill details updated successfully in memory.\n");
 
-            // Update the bill details in the file
-            rewind(fb); // Start from the beginning of the file
+
+            rewind(fb);
             char line[256];
-            long position;
+            long position=0;
+            int found =0;
 
             while (fgets(line, sizeof(line), fb))
             {
@@ -252,26 +252,56 @@ void updateBillDetails()
 
                 if (existingId == id)
                 {
-                    position = (ftell(fb)-1) - strlen(line); // Find the position to overwrite
+                    found =1;
+                    position = ftell(fb) - strlen(line); // Find the position to overwrite
                     fseek(fb, position, SEEK_SET); // Set the file pointer to the correct position
 
-                    fprintf(fb,  "%5d,%5d,%5d,%10.2f,%10.2f,%10.2f,%10.2f,%-19s,%c\n",
-                            billTemp->billId,
-                            billTemp->patientId,
-                            billTemp->treatmentId,
-                            billTemp->consultationFee,
-                            billTemp->pharmacyFee,
-                            billTemp->roomFee,
-                            billTemp->totalBillAmount,
-                            billTemp->billDate,
-                            billTemp->billStatus);
+                    switch(choice)
+                    {
+                    case UPDATE_BILL_WITH_PATIENT_ID:
+                        fseek(fb,position+5,SEEK_SET);
+                        fprintf(fb,"%5d",billTemp->patientId);
+                        break;
+                    case UPDATE_BILL_WITH_TREATMENT_ID:
+                        fseek(fb,position+11,SEEK_SET);
+                        fprintf(fb,"%5d",billTemp->treatmentId);
+                        break;
+                    case UPDATE_BILL_WITH_CONSULTATION_FEE:
+                        fseek(fb,position+17,SEEK_SET);
+                        fprintf(fb,"%10.2f",billTemp->consultationFee);
+                        billTemp->totalBillAmount =billTemp->consultationFee + billTemp->pharmacyFee + billTemp->roomFee;
+                        fseek(fb,position+50,SEEK_SET);
+                        fprintf(fb,"%10.2f",billTemp->totalBillAmount);
+                        break;
+                    case UPDATE_BILL_WITH_PHARMACY_FEE:
+                        fseek(fb,position+28,SEEK_SET);
+                        fprintf(fb,"%10.2f",billTemp->pharmacyFee);
+                        billTemp->totalBillAmount =billTemp->consultationFee + billTemp->pharmacyFee + billTemp->roomFee;
+                        fseek(fb,position+50,SEEK_SET);
+                        fprintf(fb,"%10.2f",billTemp->totalBillAmount);
+                        break;
+                    case UPDATE_BILL_WITH_ROOM_FEE:
+                        fseek(fb,position+39,SEEK_SET);
+                        fprintf(fb,"%10.2f",billTemp->roomFee);
+                        billTemp->totalBillAmount =billTemp->consultationFee + billTemp->pharmacyFee + billTemp->roomFee;
+                        fseek(fb,position+50,SEEK_SET);
+                        fprintf(fb,"%10.2f",billTemp->totalBillAmount);
+                        break;
+                    case UPDATE_BILL_DATE:
+                        fseek(fb,position+61,SEEK_SET);
+                        fprintf(fb,"%-19s",billTemp->billDate);
+                        break;
+                    }
 
-                    fflush(fb); // Ensure data is written to the file
+                    fflush(fb);
                     printf("Bill details updated successfully in the file.\n");
                     break;
                 }
             }
-
+            if (!found)
+            {
+                printf("Bill with ID %d not found.\n", id);
+            }
             return;
         }
         billTemp = billTemp->next; // Move to the next bill in the linked list

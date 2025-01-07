@@ -1,4 +1,2 @@
-
-    1,pallavi T                                        ,female   , 23,tumkur                                           ,4852               ,4528               ,D
-    2,likhitha                                         ,female   , 23,fghj                                             ,45                 ,5426               ,D
-
+    1,Likhitha                                         ,female   , 23,KARNATAKA                                        ,9743076146         ,7899917009         ,A
+    2,PALLAVI                                          ,Female   , 23,TUMKUR                                           ,849421145          ,9546321457         ,A
