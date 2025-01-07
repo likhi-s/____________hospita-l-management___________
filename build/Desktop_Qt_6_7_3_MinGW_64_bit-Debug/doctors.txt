@@ -1,2 +1,2 @@
-    1,LIKHITHA                                         ,ORTHO              ,   2000.00,9743076146    , 15,MBBS ORTHO                                       ,A
+    1,LIKHITHA                                         ,ORTHO              ,   2000.00,9743076146    , 15,MBBS ORTHO                                       ,D
     2,PALLAVI                                          ,Dermo              ,   1500.00,897451        , 12,MBBS                                             ,A

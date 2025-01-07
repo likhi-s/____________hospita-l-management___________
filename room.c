@@ -97,7 +97,7 @@ void loginAsRoomManagementUser()
                 deleteRoomById();
                 break;
             case DISPLAY_DELETED_ROOM_RECORDS:
-                displayDeletedRoomRecords();
+                displayDeletedRooms();
                 break;
             case 10:
                 printf("Saved data and exiting from room menu\n");
@@ -174,7 +174,6 @@ void deleteRoomById()
         if (roomTemp->roomId == id)
         {
             roomTemp->roomStatus = 'D';
-            printf("Room with ID %d marked as deleted.\n", id);
 
             rewind(rm);
             long position;
@@ -185,9 +184,11 @@ void deleteRoomById()
                 sscanf(line, "%d,", &existingId);
                 if (existingId == id)
                 {
-                    position = (ftell(rm) - 1) - strlen(line);
-                    fseek(rm, position, SEEK_SET);
-                    fprintf(rm, "%5d,%-9s,%10d,%10d,%-9s,%10.2f,%c\n", roomTemp->roomId, roomTemp->roomType, roomTemp->bedCount, roomTemp->availableBeds, roomTemp->bedStatus, roomTemp->roomFee, 'D');
+                    position = ftell(rm) - strlen(line);
+                    fseek(rm, position +58, SEEK_SET);
+                    fprintf(rm, "%c", 'D');
+                    printf("Room with ID %d marked as deleted.\n", id);
+
                     fflush(rm);
                     break;
                 }
@@ -569,6 +570,5 @@ void displayDeletedRooms()
         }
         roomTemp = roomTemp->next;
     }
-    printf("No deleted rooms found found.\n");
 
 }
