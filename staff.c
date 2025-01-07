@@ -226,6 +226,7 @@ void updateStaffDetails()
             rewind(fs);
             char line[256];
             long position = 0;
+            int found =0;
             while (fgets(line, sizeof(line), fs))
             {
                 int existingId;
@@ -233,17 +234,44 @@ void updateStaffDetails()
 
                 if (existingId == id)
                 {
-                    position = (ftell(fs) - 1) - strlen(line);
+                    found = 1;
+                    position = ftell(fs) - strlen(line);
                     fseek(fs, position, SEEK_SET);
+                    switch (choice)
+                    {
+                    case UPDATE_STAFF_NAME:
+                        fseek(fs,position+5,SEEK_SET);
+                        fprintf(fs,"%-49s",staffTemp->staffName);
+                        break;
+                    case UPDATE_STAFF_ROLE:
+                        fseek(fs,position+55,SEEK_SET);
+                        fprintf(fs,"%-19s",staffTemp->staffRole);
+                        break;
+                    case UPDATE_STAFF_SHIFT:
+                        fseek(fs,position+75,SEEK_SET);
+                        fprintf(fs,"%-9s",staffTemp->staffShift);
+                        break;
+                    case UPDATE_STAFF_SALARY:
+                        fseek(fs,position+85,SEEK_SET);
+                        fprintf(fs,"%10.2f",staffTemp->staffSalary);
+                        break;
+                    case UPDATE_STAFF_CONTACT_NUMBER:
+                        fseek(fs,position+96,SEEK_SET);
+                        fprintf(fs,"%-14s",staffTemp->staffContactNumber);
+                        break;
+                    }
 
-                    fprintf(fs, "%5d,%-49s,%-19s,%-9s,%10.2f,%-14s,%c\n", staffTemp->staffId, staffTemp->staffName, staffTemp->staffRole, staffTemp->staffShift, staffTemp->staffSalary, staffTemp->staffContactNumber, staffTemp->staffStatus);
 
                     fflush(fs);
 
                     break;
                 }
             }
-
+            if(!found)
+            {
+                printf("Staff with ID %d not found.\n",id);
+            }
+            fclose(fs);
             return;
         }
         staffTemp = staffTemp->next;

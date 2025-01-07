@@ -215,6 +215,7 @@ void updateTreatmentDetails()
             rewind(ft);
             char line[256];
             long position = 0;
+            int found =0;
             while (fgets(line, sizeof(line), ft))
             {
                 int existingId;
@@ -222,17 +223,35 @@ void updateTreatmentDetails()
 
                 if (existingId == id)
                 {
-                    position = (ftell(ft) - 1) - strlen(line);
+                    found =1;
+
+                    position = ftell(ft) - strlen(line);
                     fseek(ft, position, SEEK_SET);
 
-                    fprintf(ft, "%5d,%-99s,%10d,%5d,%c\n", treatmentTemp->treatmentId, treatmentTemp->treatmentName, treatmentTemp->treatmentCost, treatmentTemp->treatmentDuration, treatmentTemp->treatmentStatus);
+                    switch(choice)
+                    {
+                    case UPDATE_TREATMENT_NAME:
+                        fseek(ft,position+5, SEEK_SET);
+                        fprintf(ft, "%-99s",treatmentTemp->treatmentName);
+                        break;
+                    case UPDATE_TREATMENT_COST:
+                        fseek(ft,position+105,SEEK_SET);
+                        fprintf(ft, "%10d",treatmentTemp->treatmentCost);
+                        break;
+                    case UPDATE_TREATMENT_DURATION:
+                        fseek(ft,position+116,SEEK_SET);
+                        fprintf(ft, "%5d",treatmentTemp->treatmentDuration);
+                        break;
 
+                    }
                     fflush(ft);
-
                     break;
                 }
             }
-
+            if(!found)
+            {
+                printf("Treatment with ID %d not found.\n",id);
+            }
             return;
         }
         treatmentTemp = treatmentTemp->next;

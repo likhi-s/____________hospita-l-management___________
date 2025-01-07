@@ -26,14 +26,11 @@ void loadPatientDataFromFile()
     while (fgets(line, sizeof(line), fp))
     {
         patientNode = (patient *)malloc(sizeof(patient));
-        if (sscanf(line, "%5d,%49[^,],%9[^,],%3d,%49[^,],%19[^,],%19[^,],%c\n",
-                   &patientNode->patientId, patientNode->patientName, patientNode->patientGender,
-                   &patientNode->patientAge, patientNode->patientAddress, patientNode->patientContactNumber,
-                   patientNode->patientEmergencyContactNumber, &patientNode->patientStatus) == 8)
+        if (sscanf(line, "%5d,%49[^,],%9[^,],%3d,%49[^,],%19[^,],%19[^,],%c\n", &patientNode->patientId, patientNode->patientName, patientNode->patientGender, &patientNode->patientAge, patientNode->patientAddress, patientNode->patientContactNumber, patientNode->patientEmergencyContactNumber, &patientNode->patientStatus) == 8)
         {
 
-                patientNode->next = NULL;
-                insertPatientSorted();
+            patientNode->next = NULL;
+            insertPatientSorted();
 
         }
         else
@@ -203,12 +200,16 @@ void deletePatient()
 }
 
 void insertPatientSorted() {
-    if (patientHead == NULL || strcasecmp(patientHead->patientName, patientNode->patientName) > 0) {
+    if (patientHead == NULL || strcasecmp(patientHead->patientName, patientNode->patientName) > 0)
+    {
         patientNode->next = patientHead;
         patientHead = patientNode;
-    } else {
+    }
+    else
+    {
         patientTemp = patientHead;
-        while (patientTemp->next != NULL && strcasecmp(patientTemp->next->patientName, patientNode->patientName) < 0) {
+        while (patientTemp->next != NULL && strcasecmp(patientTemp->next->patientName, patientNode->patientName) < 0)
+        {
             patientTemp = patientTemp->next;
         }
         patientNode->next = patientTemp->next;
@@ -264,22 +265,64 @@ void updatePatientDetails()
 
             printf("Patient details updated successfully in memory.\n");
 
+            fp = fopen("patients.txt", "r+");
+            if (fp == NULL)
+            {
+                printf("Unable to open file.\n");
+                return;
+            }
             rewind(fp);
-            long position;
             char line[256];
+            long position;
+            int found = 0;
 
-            while (fgets(line, sizeof(line), fp)) {
+            while (fgets(line, sizeof(line), fp))
+            {
                 int existingId;
                 sscanf(line, "%d,", &existingId);
 
-                if (existingId == id) {
-                    position = (ftell(fp)-1) - strlen(line);
-                    fseek(fp, position, SEEK_SET);
+                if (existingId == id)
+                {
+                    found = 1;
 
-                    fprintf(fp, "%5d,%-49s,%-9s,%3d,%-49s,%-19s,%-19s,%c\n",patientTemp->patientId, patientTemp->patientName, patientTemp->patientGender, patientTemp->patientAge, patientTemp->patientAddress, patientTemp->patientContactNumber, patientTemp->patientEmergencyContactNumber, patientTemp->patientStatus);
+                    position = ftell(fp) - strlen(line);
+
+                    fseek(fp, position, SEEK_SET);//position =1
+                    switch (choice)
+                    {
+                    case UPDATE_PATIENT_NAME:
+                        fseek(fp, position + 5, SEEK_SET);
+                        fprintf(fp, "%-49s", patientTemp->patientName);
+                        break;
+                    case UPDATE_PATIENT_GENDER:
+                        fseek(fp, position + 55, SEEK_SET);
+                        fprintf(fp, "%-9s", patientTemp->patientGender);
+                        break;
+                    case UPDATE_PATIENT_AGE:
+                        fseek(fp, position + 65, SEEK_SET);
+                        fprintf(fp, "%3d", patientTemp->patientAge);
+                        break;
+                    case UPDATE_PATIENT_ADDRESS:
+                        fseek(fp, position + 69, SEEK_SET);
+                        fprintf(fp, "%-49s", patientTemp->patientAddress);
+                        break;
+                    case UPDATE_PATIENT_CONTACT_NUMBER:
+                        fseek(fp, position + 119, SEEK_SET);
+                        fprintf(fp, "%-19s", patientTemp->patientContactNumber);
+                        break;
+                    case UPDATE_PATIENT_EMERGENCY_CONTACT_NUMBER:
+                        fseek(fp, position +139, SEEK_SET);
+                        fprintf(fp, "%-19s", patientTemp->patientEmergencyContactNumber);
+                        break;
+                    }
                     fflush(fp);
                     break;
                 }
+            }
+
+            if (!found)
+            {
+                printf("Patient with ID %d not found.\n", id);
             }
 
             return;
@@ -289,6 +332,7 @@ void updatePatientDetails()
 
     printf("Patient with ID %d not found.\n", id);
 }
+
 
 
 void displayPatientDetails()
@@ -501,7 +545,7 @@ void displayDeletedRecords()
 
     while (patientTemp != NULL)
     {
-        if (patientTemp->patientStatus == 'D')  // Check if the status is 'D' for deleted
+        if (patientTemp->patientStatus == 'D')
         {
             printf("Patient ID: %d\n", patientTemp->patientId);
             printf("Name: %s\n", patientTemp->patientName);
@@ -515,6 +559,6 @@ void displayDeletedRecords()
         patientTemp = patientTemp->next;
     }
 
-        printf("No deleted patient records found.\n");
+    printf("No deleted patient records found.\n");
 
 }

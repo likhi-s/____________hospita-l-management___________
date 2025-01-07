@@ -265,10 +265,10 @@ void updateMedicineDetails()
 
             printf("Medicine details updated successfully in memory.\n");
 
-            // Update the medicine details in the file
             rewind(fm); // Rewind the file pointer to the start of the file
             char line[256];
-            long position = 0;
+            long position;
+            int found =0;
             while (fgets(line, sizeof(line), fm))
             {
                 int existingId;
@@ -276,20 +276,40 @@ void updateMedicineDetails()
 
                 if (existingId == id)
                 {
-                    position = (ftell(fm) - 1) - strlen(line); // Get the position of the line
-                    fseek(fm, position, SEEK_SET); // Move file pointer to the correct position
-
-                    // Write the updated medicine details to the file
-                    fprintf(fm, "%5d,%-49s,%10f,%10d,%-19s,%-19s,%c\n",
-                            pharmacyTemp->medicineId, pharmacyTemp->medicineName,
-                            pharmacyTemp->medicineCost, pharmacyTemp->medicineStockQuantity,
-                            pharmacyTemp->medicineType, pharmacyTemp->medicineDosage, pharmacyTemp->medicineStatus);
-
-                    fflush(fm); // Ensure changes are written immediately
+                    found = 1;
+                    position = ftell(fm) - strlen(line); // Get the position of the line
+                    fseek(fm, position, SEEK_SET);
+                    switch(choice)
+                    {
+                    case UPDATE_MEDICINE_NAME:
+                        fseek(fm,position +5,SEEK_SET);
+                        fprintf(fm,"%-49s",pharmacyTemp->medicineName);
+                        break;
+                    case UPDATE_MEDICINE_COST:
+                        fseek(fm,position +55,SEEK_SET);
+                        fprintf(fm, "%10f",pharmacyTemp->medicineCost);
+                        break;
+                    case UPDATE_MEDICINE_STOCK:
+                        fseek(fm,position +66,SEEK_SET);
+                        fprintf(fm,"%10d",pharmacyTemp->medicineStockQuantity);
+                        break;
+                    case UPDATE_MEDICINE_TYPE:
+                        fseek(fm,position+77 ,SEEK_SET);
+                        fprintf(fm,"%-19s",pharmacyTemp->medicineType);
+                        break;
+                    case UPDATE_MEDICINE_DOSAGE:
+                        fseek(fm,position+97,SEEK_SET);
+                        fprintf(fm,"%-19s",pharmacyTemp->medicineDosage);
+                        break;
+                    }
+                    fflush(fm);
                     break;
                 }
             }
-
+            if(!found)
+            {
+                printf("Medicine with ID %d not found.\n",id);
+            }
             return;
         }
         pharmacyTemp = pharmacyTemp->next;

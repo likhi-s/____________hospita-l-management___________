@@ -1,2 +1,1 @@
-    1,general  ,25,23,vacant   ,2500.000000,D
-    2,general  ,40,0,occupied ,500.000000,A
+    2,GENERAL  ,        30,        25,VACANT   ,   2000.00,D
