@@ -1,2 +1,2 @@
-    1,typoidddd                                                                                          ,     25000,   10,D
+    1,typoidddd                                                                                          ,     25000,   10,A
     2,dengue                                                                                             ,      4500,   12,D

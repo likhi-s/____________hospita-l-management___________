@@ -36,10 +36,11 @@ enum MedicineDetailOption
     UPDATE_MEDICINE_DOSAGE
 };
 void  loginAsPharmacyManagementUser();
+void loadPharmacyDataFromFile();
 void addMedicine();
 void updateMedicineDetails();
 void displayMedicineDetails();
-void searchByMedicineId();
+pharmacy* searchByMedicineId();
 void searchByMedicineName();
 void checkMedicineStock();
 void sortByMedicineId();

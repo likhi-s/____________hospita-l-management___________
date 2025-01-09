@@ -1,2 +1,2 @@
-    1,dolo - 650                                       , 32.500000,        85,tablet             ,650 mg             ,D
-    2,Aspirin                                          , 50.000000,       100,Tablet             ,500mg              ,D
+    1,dolo - 650                                       , 32.500000,        85,tablet             ,650 mg             ,A
+    2,Aspirin                                          , 50.000000,       100,Tablet             ,500mg              ,A

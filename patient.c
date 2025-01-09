@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "patient.h"
+#include "bill.h"
 
 #define USER_ID "123"
 #define USER_PASSWORD "123"
@@ -12,9 +13,18 @@ patient *patientHead = NULL;
 patient *patientTemp;
 patient *patientNode;
 FILE *fp;
-
+int lastPatientId =0;
 void loadPatientDataFromFile()
 {
+    fp = fopen(FILE_NAME, "r+");
+    if (fp == NULL) {
+        fp = fopen(FILE_NAME, "w+");
+        if (fp == NULL)
+        {
+            printf("Unable to open or create file.\n");
+            exit(1);
+        }
+    }
     if (fp == NULL)
     {
         printf("File is not open for reading.\n");
@@ -43,15 +53,7 @@ void loadPatientDataFromFile()
 
 void loginAsPatientManagementUser()
 {
-    fp = fopen(FILE_NAME, "r+");
-    if (fp == NULL) {
-        fp = fopen(FILE_NAME, "w+");
-        if (fp == NULL)
-        {
-            printf("Unable to open or create file.\n");
-            exit(1);
-        }
-    }
+
 
     char userId[15];
     char userPass[15];
@@ -123,20 +125,10 @@ void registerPatient()
         return;
     }
 
-    printf("Enter Patient ID: ");
-    scanf("%d", &patientNode->patientId);
+    patientNode->patientId = ++lastPatientId;
+    printf("Generated Patient Id: %d\n",patientNode->patientId);
 
-    patientTemp = patientHead;
-    while (patientTemp != NULL)
-    {
-        if (patientTemp->patientId == patientNode->patientId)
-        {
-            printf("Patient with ID %d already exists.\n", patientNode->patientId);
-            free(patientNode);
-            return;
-        }
-        patientTemp = patientTemp->next;
-    }
+
 
     printf("Enter Patient Name: ");
     scanf(" %[^\n]", patientNode->patientName);
@@ -375,7 +367,7 @@ void displayPatientDetails()
     }
 }
 
-void searchByPatientId()
+patient* searchByPatientId()
 {
     int found =0;
     int id;
@@ -396,7 +388,7 @@ void searchByPatientId()
             printf("Contact Number: %s\n", patientTemp->patientContactNumber);
             printf("Emergency Contact Number: %s\n", patientTemp->patientEmergencyContactNumber);
             printf("\n");
-            return;
+            return patientTemp;
         }
         patientTemp = patientTemp->next;
     }

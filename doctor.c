@@ -6,15 +6,26 @@
 
 #define USER_ID "123"
 #define USER_PASSWORD "123"
-#define FILE_NAME "doctors.txt"
+#define DOCTOR_FILE_NAME "doctors.txt"
 
 doctor *doctorHead = NULL;
 doctor *doctorTemp;
 doctor *doctorNode;
 FILE *fd;
-
+int lastDoctorId=0;
 void loadDoctorDataFromFile()
 {
+    fd = fopen(DOCTOR_FILE_NAME, "r+");
+    if (fd == NULL)
+    {
+        fd = fopen(DOCTOR_FILE_NAME, "w+");
+        if (fd == NULL)
+        {
+            printf("Unable to open or create file.\n");
+            exit(1);
+        }
+    }
+
     if (fd == NULL)
     {
         printf("File is not open for reading.\n");
@@ -42,16 +53,6 @@ void loadDoctorDataFromFile()
 
 void loginAsDoctorManagementUser()
 {
-    fd = fopen(FILE_NAME, "r+");
-    if (fd == NULL)
-    {
-        fd = fopen(FILE_NAME, "w+");
-        if (fd == NULL)
-        {
-            printf("Unable to open or create file.\n");
-            exit(1);
-        }
-    }
 
     char userId[15];
     char userPass[15];
@@ -122,20 +123,9 @@ void addDoctor()
         return;
     }
 
-    printf("Enter Doctor ID: ");
-    scanf("%d", &doctorNode->doctorId);
+    doctorNode->doctorId = ++lastDoctorId;
+    printf("Generated doctor ID: %d\n",  doctorNode->doctorId);
 
-    doctorTemp = doctorHead;
-    while (doctorTemp != NULL)
-    {
-        if (doctorTemp->doctorId == doctorNode->doctorId)
-        {
-            printf("Doctor with ID %d already exists.\n", doctorNode->doctorId);
-            free(doctorNode);
-            return;
-        }
-        doctorTemp = doctorTemp->next;
-    }
 
     printf("Enter Doctor Name: ");
     scanf(" %[^\n]", doctorNode->doctorName);
@@ -340,7 +330,7 @@ void deleteDoctorById()
     }
 }
 
-void searchByDoctorId()
+doctor* searchByDoctorId()
 {
     int id;
     printf("Enter Doctor ID to search: ");
@@ -360,7 +350,7 @@ void searchByDoctorId()
             printf("Qualification: %s\n", doctorTemp->doctorQualification);
             printf("\n");
             searchIdFound = 1;
-            break;
+            return(doctorTemp);
         }
         doctorTemp = doctorTemp->next;
     }

@@ -10,6 +10,7 @@ typedef struct patient {
     char patientAddress[50];
     char patientContactNumber[20];
     char patientEmergencyContactNumber[20];
+    int assignedRoomId;
     char patientStatus;  // 'A' for Active, 'D' for Deleted
     struct patient* next;
 } patient;
@@ -43,13 +44,13 @@ void loadPatientDataFromFile();
 void loginAsPatientManagementUser();
 void registerPatient();//insert by name while registration only
 void displayPatientDetails();
-char* copyingName(bill * billNode,patient *patientNode);
 void updatePatientDetails();
-void searchByPatientId();
+patient* searchByPatientId();
 void searchByPatientName();
 void sortPatientsById();
-void deletePatientById();
-void insertPatientSortedByName();
+void deletePatient();
+void displayDeletedRecords();
+void insertPatientSorted();
 
 
 #endif // PATIENT_H

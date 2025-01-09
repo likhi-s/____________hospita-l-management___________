@@ -12,9 +12,20 @@ room *roomHead = NULL;
 room *roomTemp;
 room *roomNode;
 FILE *rm;
+int lastRoomId=0;
 
 void loadRoomDataFromFile()
 {
+    rm = fopen(ROOM_FILE_NAME, "r+");
+    if (rm == NULL)
+    {
+        rm = fopen(ROOM_FILE_NAME, "w+");
+        if (rm == NULL)
+        {
+            printf("Unable to open or create file.\n");
+            exit(1);
+        }
+    }
     if (rm == NULL)
     {
         printf("File is not open for reading.\n");
@@ -41,16 +52,7 @@ void loadRoomDataFromFile()
 
 void loginAsRoomManagementUser()
 {
-    rm = fopen(ROOM_FILE_NAME, "r+");
-    if (rm == NULL)
-    {
-        rm = fopen(ROOM_FILE_NAME, "w+");
-        if (rm == NULL)
-        {
-            printf("Unable to open or create file.\n");
-            exit(1);
-        }
-    }
+
 
     char userId[15];
     char userPass[15];
@@ -99,7 +101,7 @@ void loginAsRoomManagementUser()
             case DISPLAY_DELETED_ROOM_RECORDS:
                 displayDeletedRooms();
                 break;
-            case 10:
+            case EXIT_ROOM_MANAGEMENT:
                 printf("Saved data and exiting from room menu\n");
                 fclose(rm);
                 return;
@@ -124,21 +126,10 @@ void addRoom()
         printf("Memory allocation failed!\n");
         return;
     }
+    roomNode->roomId =++lastRoomId;
+    printf("Generated Room ID: %d\n", roomNode->roomId);
 
-    printf("Enter Room ID: ");
-    scanf("%d", &roomNode->roomId);
 
-    roomTemp = roomHead;
-    while (roomTemp != NULL)
-    {
-        if (roomTemp->roomId == roomNode->roomId)
-        {
-            printf("Room with ID %d already exists.\n", roomNode->roomId);
-            free(roomNode);
-            return;
-        }
-        roomTemp = roomTemp->next;
-    }
 
     printf("Enter Room Type (icu/general/private): ");
     scanf("%s", roomNode->roomType);
@@ -353,7 +344,7 @@ void displayRoomDetails()
     }
 }
 
-void searchByRoomId()
+room* searchByRoomId()
 {
     int id;
     printf("Enter Room ID to search: ");
@@ -371,7 +362,7 @@ void searchByRoomId()
             printf("Bed Status: %s\n", roomTemp->bedStatus);
             printf("Room Fee: %.2f\n", roomTemp->roomFee);
             printf("\n");
-            return;
+            return(roomTemp);
         }
         roomTemp = roomTemp->next;
     }
