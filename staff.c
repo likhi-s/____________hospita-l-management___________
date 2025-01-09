@@ -12,6 +12,7 @@ staff *staffHead = NULL;
 staff *staffTemp;
 staff *staffNode;
 FILE *fs;
+int lastStaffId =0;
 
 void loadStaffDataFromFile()
 {
@@ -122,21 +123,10 @@ void addStaff()
         printf("Memory allocation failed!\n");
         return;
     }
+    staffNode->staffId = ++lastStaffId;
+    printf("Generated Staff ID: %d\n",staffNode->staffId);
 
-    printf("Enter Staff ID: ");
-    scanf("%d", &staffNode->staffId);
 
-    staffTemp = staffHead;
-    while (staffTemp != NULL)
-    {
-        if (staffTemp->staffId == staffNode->staffId)
-        {
-            printf("Staff with ID %d already exists.\n", staffNode->staffId);
-            free(staffNode);
-            return;
-        }
-        staffTemp = staffTemp->next;
-    }
 
     printf("Enter Staff Name: ");
     scanf(" %[^\n]", staffNode->staffName);

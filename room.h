@@ -43,7 +43,7 @@ void loginAsRoomManagementUser();
 void addRoom();
 void updateRoomDetails();
 void displayRoomDetails();
-void searchByRoomId();
+room* searchByRoomId();
 void searchByRoomType();
 void checkAvailability();
 void sortByRoomId();

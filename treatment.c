@@ -12,9 +12,20 @@ treatment *treatmentHead = NULL;
 treatment *treatmentTemp;
 treatment *treatmentNode;
 FILE *ft;
-
+int lastTreatmentId=0;
 void loadTreatmentDataFromFile()
 {
+    ft = fopen(TREATMENT_FILE_NAME, "r+");
+    if (ft == NULL)
+    {
+        ft = fopen(TREATMENT_FILE_NAME, "w+");
+        if (ft == NULL)
+        {
+            printf("Unable to open or create file.\n");
+            exit(1);
+        }
+    }
+
     if (ft == NULL)
     {
         printf("File is not open for reading.\n");
@@ -43,16 +54,6 @@ void loadTreatmentDataFromFile()
 
 void loginAsTreatmentAndPriceManagementUser()
 {
-    ft = fopen(TREATMENT_FILE_NAME, "r+");
-    if (ft == NULL)
-    {
-        ft = fopen(TREATMENT_FILE_NAME, "w+");
-        if (ft == NULL)
-        {
-            printf("Unable to open or create file.\n");
-            exit(1);
-        }
-    }
 
     char userId[15];
     char userPass[15];
@@ -123,21 +124,11 @@ void addTreatment()
         printf("Memory allocation failed!\n");
         return;
     }
+    treatmentNode->treatmentId =++lastTreatmentId;
+    printf("Generated treatment ID: %d\n", treatmentNode->treatmentId );
 
-    printf("Enter Treatment ID: ");
-    scanf("%d", &treatmentNode->treatmentId);
 
-    treatmentTemp = treatmentHead;
-    while (treatmentTemp != NULL)
-    {
-        if (treatmentTemp->treatmentId == treatmentNode->treatmentId)
-        {
-            printf("Treatment with ID %d already exists.\n", treatmentNode->treatmentId);
-            free(treatmentNode);
-            return;
-        }
-        treatmentTemp = treatmentTemp->next;
-    }
+
 
     printf("Enter Treatment Name: ");
     scanf(" %[^\n]", treatmentNode->treatmentName);
@@ -326,7 +317,7 @@ void displayTreatment()
     }
 }
 
-void searchByTreatmentId()
+treatment* searchByTreatmentId()
 {
     int id;
     printf("Enter Treatment ID to search: ");
@@ -342,7 +333,7 @@ void searchByTreatmentId()
             printf("Cost: %d\n", treatmentTemp->treatmentCost);
             printf("Duration: %d days\n", treatmentTemp->treatmentDuration);
             printf("\n");
-            return;
+            return(treatmentTemp);
         }
         treatmentTemp = treatmentTemp->next;
     }

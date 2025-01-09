@@ -12,9 +12,21 @@ pharmacy *pharmacyHead = NULL;
 pharmacy *pharmacyTemp;
 pharmacy *pharmacyNode;
 FILE *fm;
+int lastPharmacyId;
 
 void loadPharmacyDataFromFile()
 {
+    fm = fopen(PHARMACY_FILE_NAME, "r+");
+    if (fm == NULL)
+    {
+        fm = fopen(PHARMACY_FILE_NAME, "w+");
+        if (fm == NULL)
+        {
+            printf("Unable to open or create file.\n");
+            exit(1);
+        }
+    }
+
     if (fm == NULL)
     {
         printf("File is not open for reading.\n");
@@ -41,16 +53,6 @@ void loadPharmacyDataFromFile()
 
 void loginAsPharmacyManagementUser()
 {
-    fm = fopen(PHARMACY_FILE_NAME, "r+");
-    if (fm == NULL)
-    {
-        fm = fopen(PHARMACY_FILE_NAME, "w+");
-        if (fm == NULL)
-        {
-            printf("Unable to open or create file.\n");
-            exit(1);
-        }
-    }
 
     char userId[15];
     char userPass[15];
@@ -125,20 +127,11 @@ void addMedicine()
         return;
     }
 
-    printf("Enter Medicine ID: ");
-    scanf("%d", &pharmacyNode->medicineId);
+    pharmacyNode->medicineId = ++lastPharmacyId;
+    printf("Generated Medicine ID: %d\n", pharmacyNode->medicineId);
 
-    pharmacyTemp = pharmacyHead;
-    while (pharmacyTemp != NULL)
-    {
-        if (pharmacyTemp->medicineId == pharmacyNode->medicineId)
-        {
-            printf("Medicine with ID %d already exists.\n", pharmacyNode->medicineId);
-            free(pharmacyNode);
-            return;
-        }
-        pharmacyTemp = pharmacyTemp->next;
-    }
+
+
 
     printf("Enter Medicine Name: ");
     scanf(" %[^\n]", pharmacyNode->medicineName);
@@ -359,7 +352,7 @@ void displayMedicineDetails()
     }
 }
 
-void searchByMedicineId()
+pharmacy* searchByMedicineId()
 {
     int id;
     int found =0;
@@ -379,7 +372,7 @@ void searchByMedicineId()
             printf("Type: %s\n", pharmacyTemp->medicineType);
             printf("Dosage: %s\n", pharmacyTemp->medicineDosage);
             printf("\n");
-            return;
+            return(pharmacyTemp);
         }
         pharmacyTemp = pharmacyTemp->next;
     }

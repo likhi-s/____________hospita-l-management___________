@@ -41,10 +41,11 @@ enum DoctorUpdateDetail
 
 
 void loginAsDoctorManagementUser();
+void loadDoctorDataFromFile();
 void addDoctor();
 void updateDoctorDetails();
 void displayDoctorDetails();
-void searchByDoctorId();
+doctor* searchByDoctorId();
 void searchByDoctorSpecialization();
 void sortDoctorsById();
 void insertDoctorSortedByName();

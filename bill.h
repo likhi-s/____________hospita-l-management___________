@@ -4,14 +4,18 @@
 typedef struct bill
 {
     int billId;
-    int patientId;
     char patientName[50];
-    int treatmentId;
+    char treatmentName[100];
+    float treatmentCost;
+    char doctorName[15];
     float consultationFee;
+    char medicineName[50];
+    float medicineCost;
     float pharmacyFee;
+    char roomType[10];
     float roomFee;
     float totalBillAmount;
-    char billDate[20];
+    char billDate[15];
     char billStatus;
     struct bill *next;
 } bill;
@@ -19,35 +23,25 @@ typedef struct bill
 
 enum BillMenuOption
 {
-    ADD_BILL = 1,
-    UPDATE_BILL_DETAILS,
+    GENERATE_BILL = 1,
     DISPLAY_BILL_DETAILS,
-    SEARCH_BILL_BY_PATIENT_ID,
-    CALCULATE_BILL,
-    SORT_BILL_BY_BILL_ID,
     DELETE_BILL_BY_ID,
     DISPLAY_DELETED_BILL_RECORDS,
+    SEARCH_BILL_BY_PATIENT_ID,
+    SORT_BILL_BY_BILL_ID,
     EXIT_BILL_MANAGEMENT
 };
-enum BillUpdateChoice
-{
 
-    UPDATE_BILL_WITH_PATIENT_ID=1,
-    UPDATE_BILL_WITH_TREATMENT_ID,
-    UPDATE_BILL_WITH_CONSULTATION_FEE,
-    UPDATE_BILL_WITH_PHARMACY_FEE,
-    UPDATE_BILL_WITH_ROOM_FEE,
-    UPDATE_BILL_DATE
-};
 
 
 void loginAsBillManagementUser();
-void addBill();
-void updateBillDetails();
+void generateBill();
 void displayBillDetails();
-void searchBillByPatientId();
-void calculateBill();
 void deleteBillById();
+void displayDeletedBillRecords();
+void searchBillByPatientName();
 void sortByBillId();
+void insertBillSortedById();
+
 
 #endif // BILL_H

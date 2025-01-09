@@ -34,10 +34,11 @@ enum TreatmentUpdateOptions
 
 
 void loginAsTreatmentAndPriceManagementUser();
+void loadTreatmentDataFromFile();
 void addTreatment();
 void updateTreatmentDetails();
 void displayTreatment();
-void searchByTreatmentId();
+treatment* searchByTreatmentId();
 void searchByTreatmentName();
 void sortTreatmentById();
 void deleteTreatmentById();
