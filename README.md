@@ -109,7 +109,7 @@ void checkMedicineStock();
 void sortByMedicineId();
 void deleteMedicineById();
 
--**Treatment Management**:
+- **Treatment Management**:
 void loginAsTreatmentAndPriceManagementUser();
 void loadTreatmentDataFromFile();
 void addTreatment();
@@ -120,7 +120,7 @@ void searchByTreatmentName();
 void sortTreatmentById();
 void deleteTreatmentById();
 
--**Room Managemnet**:
+- **Room Managemnet**:
 void loginAsRoomManagementUser();
 void addRoom();
 void updateRoomDetails();
@@ -131,7 +131,7 @@ void checkAvailability();
 void sortByRoomId();
 void deleteRoomById();
 
--**Billing Management**:
+- **Billing Management**:
 void loginAsBillManagementUser();
 void generateBill();
 void displayBillDetails();
