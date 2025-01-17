@@ -569,6 +569,6 @@ void generateRoomData()
 {
     for(int i =1; i<=10000; i++)
     {
-        addRoom("type %d",i);
+        addRoom();
     }
 }

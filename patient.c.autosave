@@ -294,6 +294,21 @@ void updatePatientDetails()
                 scanf("%s", patientTemp->patientGender);
                 break;
             case UPDATE_PATIENT_AGE:
+                while(true)
+                {
+                    printf("Enter Age: ");
+                    int age;
+                    if(scanf("%d", &age)==1 && age > 0 && age <100)
+                    {
+                        patientNode->patientAge = age;
+                        break;
+                    }
+                    else
+                    {
+                        printf("Invalid Age ,Enter age between 0 and 100\n");
+                    }
+                    
+                }
                 printf("New Age: ");
                 scanf("%d", &patientTemp->patientAge);
                 break;
