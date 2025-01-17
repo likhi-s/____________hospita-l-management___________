@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "doctor.h"
-
+#define FILE_OPEN_ERROR 1
 #define USER_ID "123"
 #define USER_PASSWORD "123"
 #define DOCTOR_FILE_NAME "doctors.txt"
@@ -22,7 +22,7 @@ void loadDoctorDataFromFile()
         if (fd == NULL)
         {
             printf("Unable to open or create file.\n");
-            exit(1);
+            exit(FILE_OPEN_ERROR);
         }
     }
 
@@ -32,13 +32,17 @@ void loadDoctorDataFromFile()
         return;
     }
     rewind(fd);
-
+    int maxId =0;
     char line[256];
     while (fgets(line, sizeof(line), fd))
     {
         doctorNode = (doctor *)malloc(sizeof(doctor));
         if (sscanf(line, "%5d,%49[^,],%19[^,],%10f,%14[^,],%3d,%49[^\n],%c\n", &doctorNode->doctorId, doctorNode->doctorName, doctorNode->doctorSpecialization, &doctorNode->doctorConsultationFee, doctorNode->doctorContactNumber, &doctorNode->doctorExperience, doctorNode->doctorQualification, &doctorNode->doctorStatus) == 8)
         {
+            if(doctorNode->doctorId > maxId)
+            {
+                maxId = doctorNode->doctorId;
+            }
             doctorNode->next = NULL;
             insertDoctorSortedByName();
         }
@@ -47,6 +51,7 @@ void loadDoctorDataFromFile()
             free(doctorNode);
         }
     }
+    lastDoctorId = maxId;
     printf("Doctor data loaded from file.\n");
 }
 
@@ -76,6 +81,7 @@ void loginAsDoctorManagementUser()
             {
             case ADD_DOCTOR:
                 addDoctor();
+                //generateDoctorData();
                 break;
             case UPDATE_DOCTOR_DETAILS:
                 updateDoctorDetails();
@@ -133,10 +139,38 @@ void addDoctor()
     scanf(" %[^\n]", doctorNode->doctorSpecialization);
     printf("Enter Consultation Fee: ");
     scanf("%f", &doctorNode->doctorConsultationFee);
-    printf("Enter Contact Number: ");
-    scanf("%s", doctorNode->doctorContactNumber);
-    printf("Enter Experience (in years): ");
-    scanf("%d", &doctorNode->doctorExperience);
+    while(true)
+    {
+        printf("Enter Contact Number: ");
+        char contactNumber[15];
+        if (scanf("%s", contactNumber) == 1 && strlen(contactNumber) == 10)
+        {
+            strcpy(doctorNode->doctorContactNumber, contactNumber);
+            break;
+
+        }
+        else
+        {
+            printf("Invalid contact number,Enter 10 digit number\n");
+        }
+
+    }
+    while(true)
+    {
+        printf("Enter Experience (in years): ");
+        int experience;
+        if(scanf("%d", &experience)==1 && experience >= 0 && experience < 40)
+        {
+           doctorNode->doctorExperience = experience;
+            break;
+        }
+        else
+        {
+            printf("Invalid Age ,Enter age between 0 and 100\n");
+        }
+
+    }
+
     printf("Enter Qualification: ");
     scanf(" %[^\n]", doctorNode->doctorQualification);
 
@@ -146,7 +180,7 @@ void addDoctor()
     insertDoctorSortedByName();
 
     fseek(fd, 0, SEEK_END);
-    fprintf(fd, "%5d,%-49s,%-19s,%10f,%-14s,%3d,%-49s,%c\n", doctorNode->doctorId, doctorNode->doctorName, doctorNode->doctorSpecialization, doctorNode->doctorConsultationFee, doctorNode->doctorContactNumber, doctorNode->doctorExperience, doctorNode->doctorQualification, doctorNode->doctorStatus);
+    fprintf(fd, "%5d,%-49s,%-19s,%10.2f,%-14s,%3d,%-49s,%c\n", doctorNode->doctorId, doctorNode->doctorName, doctorNode->doctorSpecialization, doctorNode->doctorConsultationFee, doctorNode->doctorContactNumber, doctorNode->doctorExperience, doctorNode->doctorQualification, doctorNode->doctorStatus);
     fflush(fd);
     printf("Doctor added successfully and saved to file!\n");
 }
@@ -296,7 +330,7 @@ void deleteDoctorById()
     doctorTemp = doctorHead;
     while (doctorTemp != NULL)
     {
-        if (doctorTemp->doctorId == id)
+        if (doctorTemp->doctorId == id &&  doctorTemp->doctorStatus == 'A')
         {
             found =1;
             doctorTemp->doctorStatus = 'D';
@@ -359,6 +393,7 @@ doctor* searchByDoctorId()
         printf("Doctor with ID %d not found.\n", id);
     }
 }
+
 void searchByDoctorSpecialization()
 {
     char specialization[50];
@@ -370,9 +405,13 @@ void searchByDoctorSpecialization()
 
     while (doctorTemp != NULL)
     {
-        if (strcasecmp(specialization, doctorTemp->doctorSpecialization) == 0 && doctorTemp->doctorStatus == 'A')
-        {
-            printf("--- Doctor Found ---\n");
+        if (strcasecmp(specialization, doctorTemp->doctorSpecialization) == 0 && doctorTemp->doctorStatus == 'A') {
+            if (!searchSpecializationFound)
+            {
+                printf("--- Doctors with Specialization '%s' ---\n", specialization);
+            }
+            printf("----Doctor Found-----\n");
+
             printf("Doctor ID: %d\n", doctorTemp->doctorId);
             printf("Name: %s\n", doctorTemp->doctorName);
             printf("Specialization: %s\n", doctorTemp->doctorSpecialization);
@@ -382,16 +421,17 @@ void searchByDoctorSpecialization()
             printf("Qualification: %s\n", doctorTemp->doctorQualification);
             printf("\n");
             searchSpecializationFound = 1;
-            break;
         }
+
         doctorTemp = doctorTemp->next;
     }
 
     if (!searchSpecializationFound)
     {
-        printf("Doctor with Specialization '%s' not found.\n", specialization);
+        printf("\nNo active doctors found with specialization '%s'.\n", specialization);
     }
 }
+
 
 void displayDoctorDetails()
 {
@@ -569,4 +609,48 @@ void displayDeletedDoctorDetails()
 
     }
 
+}
+
+
+void generateDoctorData()
+{
+    fd = fopen(DOCTOR_FILE_NAME, "r+");
+    if (fd == NULL)
+    {
+        fd = fopen(DOCTOR_FILE_NAME, "w+");
+        if (fd == NULL)
+        {
+            printf("Unable to open or create file.\n");
+            exit(FILE_OPEN_ERROR);
+        }
+    }
+
+    for (int i = 1; i <= 10000; i++)
+    {
+
+        doctorNode->doctorId = i;
+
+        snprintf(doctorNode->doctorName, sizeof(doctorNode->doctorName), "doctor%d", i);
+
+        snprintf(doctorNode->doctorSpecialization, sizeof(doctorNode->doctorSpecialization), "Speci%d", (i % 10)+1);
+
+        doctorNode->doctorConsultationFee = (i % 10)+1000;
+
+        snprintf(doctorNode->doctorContactNumber, sizeof(doctorNode->doctorContactNumber), "900000%04d", i);
+
+        doctorNode->doctorExperience = (i % 10)+1;
+
+        snprintf(doctorNode->doctorQualification, sizeof(doctorNode->doctorQualification), "Qualification%d", (i % 10)+1);
+
+        doctorNode->doctorStatus = (i % 2 == 0) ? 'A' : 'D';
+
+
+        fseek(fd, 0, SEEK_END);
+
+
+        fprintf(fd, "%5d,%-49s,%-19s,%10.2f,%-14s,%3d,%-49s,%c\n", doctorNode->doctorId, doctorNode->doctorName, doctorNode->doctorSpecialization, doctorNode->doctorConsultationFee, doctorNode->doctorContactNumber, doctorNode->doctorExperience, doctorNode->doctorQualification, doctorNode->doctorStatus);
+
+        fflush(fd);
+    }
+    printf("10,000 Doctors data generated and saved to file\n");
 }

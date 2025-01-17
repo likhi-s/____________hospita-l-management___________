@@ -75,6 +75,7 @@ void loginAsRoomManagementUser()
             switch (option)
             {
             case ADD_ROOM:
+                generateRoomData();
                 addRoom();
                 break;
             case UPDATE_ROOM_DETAILS:
@@ -562,4 +563,12 @@ void displayDeletedRooms()
         roomTemp = roomTemp->next;
     }
 
+}
+
+void generateRoomData()
+{
+    for(int i =1; i<=10000; i++)
+    {
+        addRoom("type %d",i);
+    }
 }

@@ -3,7 +3,9 @@
 #include <string.h>
 #include <stdbool.h>
 #include "pharmacy.h"
-
+#define FILE_OPEN_ERROR 1
+#define MEDICINE_TYPE_1 "tablet"
+#define MEDICINE_TYPE_2 "injection"
 #define PHARMACY_FILE_NAME "pharmacy.txt"
 #define PHARMACY_USER_ID "123"
 #define PHARMACY_USER_PASSWORD "123"
@@ -12,7 +14,7 @@ pharmacy *pharmacyHead = NULL;
 pharmacy *pharmacyTemp;
 pharmacy *pharmacyNode;
 FILE *fm;
-int lastPharmacyId;
+int lastPharmacyId =0;
 
 void loadPharmacyDataFromFile()
 {
@@ -23,7 +25,7 @@ void loadPharmacyDataFromFile()
         if (fm == NULL)
         {
             printf("Unable to open or create file.\n");
-            exit(1);
+            exit(FILE_OPEN_ERROR);
         }
     }
 
@@ -33,13 +35,17 @@ void loadPharmacyDataFromFile()
         return;
     }
     rewind(fm);
-
+    int maxId =0;
     char line[256];
     while (fgets(line, sizeof(line), fm))
     {
         pharmacyNode = (pharmacy *)malloc(sizeof(pharmacy));
         if (sscanf(line, "%5d,%49[^,],%10f,%10d,%19[^,],%19[^,],%c", &pharmacyNode->medicineId, pharmacyNode->medicineName, &pharmacyNode->medicineCost, &pharmacyNode->medicineStockQuantity, pharmacyNode->medicineType, pharmacyNode->medicineDosage, &pharmacyNode->medicineStatus) == 7)
         {
+            if(pharmacyNode->medicineId > maxId)
+            {
+                maxId = pharmacyNode->medicineId;
+            }
                 pharmacyNode->next = NULL;
                 insertMedicineSortedByName();
         }
@@ -48,6 +54,7 @@ void loadPharmacyDataFromFile()
             free(pharmacyNode);
         }
     }
+    lastPharmacyId = maxId;
     printf("Pharmacy data loaded from file.\n");
 }
 
@@ -75,6 +82,7 @@ void loginAsPharmacyManagementUser()
             switch (option)
             {
             case ADD_NEW_MEDICINE:
+                generatePharmacyData();
                 addMedicine();
                 break;
             case UPDATE_MEDICINE_DETAILS:
@@ -131,16 +139,27 @@ void addMedicine()
     printf("Generated Medicine ID: %d\n", pharmacyNode->medicineId);
 
 
-
-
     printf("Enter Medicine Name: ");
     scanf(" %[^\n]", pharmacyNode->medicineName);
     printf("Enter Medicine Cost: ");
     scanf("%f", &pharmacyNode->medicineCost);
     printf("Enter Stock Quantity: ");
     scanf("%d", &pharmacyNode->medicineStockQuantity);
-    printf("Enter Medicine Type (tablet/injection): ");
-    scanf(" %[^\n]", pharmacyNode->medicineType);
+    while(true)
+    {
+        printf("Enter Medicine Type (tablet/injection): ");
+        char medicinetype[20];
+        if(scanf("%s",medicinetype)==1 && strcasecmp(medicinetype,MEDICINE_TYPE_1)==0 || strcasecmp(medicinetype,MEDICINE_TYPE_2) == 0)
+        {
+            strcpy(pharmacyNode->medicineType , medicinetype);
+            break;
+        }
+        else
+        {
+            printf("Invalid Medicine Type,Enter Tablet / injection\n");
+        }
+    }
+
     printf("Enter Medicine Dosage: ");
     scanf(" %[^\n]", pharmacyNode->medicineDosage);
 
@@ -183,7 +202,7 @@ void deleteMedicineById()
     pharmacyTemp = pharmacyHead;
     while (pharmacyTemp != NULL)
     {
-        if (pharmacyTemp->medicineId == id)
+        if (pharmacyTemp->medicineId == id && pharmacyTemp->medicineStatus == 'A')
         {
             found =1;
             pharmacyTemp->medicineStatus = 'D';
@@ -395,7 +414,12 @@ void searchByMedicineName()
     {
         if (strcasecmp(name, pharmacyTemp->medicineName) == 0 && pharmacyTemp->medicineStatus == 'A')
         {
-            found =1;
+            if(!found)
+            {
+                printf("Medicine with Name '%s' not found.\n", name);
+
+            }
+
             printf("--- Medicine Found ---\n");
             printf("ID: %d\n", pharmacyTemp->medicineId);
             printf("Cost: %.2f\n", pharmacyTemp->medicineCost);
@@ -403,7 +427,7 @@ void searchByMedicineName()
             printf("Type: %s\n", pharmacyTemp->medicineType);
             printf("Dosage: %s\n", pharmacyTemp->medicineDosage);
             printf("\n");
-            return;
+            found =1;
         }
         pharmacyTemp = pharmacyTemp->next;
     }
@@ -574,5 +598,34 @@ void displayDeletedMedicines()
 
     }
 
+}
+
+void generatePharmacyData()
+{
+    fm = fopen(PHARMACY_FILE_NAME, "r+");
+    if (fm == NULL)
+    {
+        fm = fopen(PHARMACY_FILE_NAME, "w+");
+        if (fm == NULL)
+        {
+            printf("Unable to open or create file.\n");
+            exit(FILE_OPEN_ERROR);
+        }
+    }
+
+    for(int i =1; i<=10000; i++)
+    {
+        pharmacyNode->medicineId = i;
+        snprintf(pharmacyNode->medicineName,sizeof(pharmacyNode->medicineName),"medicine%d",i);
+        pharmacyNode->medicineCost = (i % 10)+1;
+        pharmacyNode->medicineStockQuantity = 100;
+        snprintf(pharmacyNode->medicineType,sizeof(pharmacyNode->medicineType),((i%2)==0) ? "tablet" : "injection");
+        snprintf(pharmacyNode->medicineDosage,sizeof(pharmacyNode->medicineDosage),"%dmg",(i%10));
+        pharmacyNode->medicineStatus = (i % 2 ==0) ? 'A' : 'D';
+        fseek(fm, 0, SEEK_END);
+        fprintf(fm, "%5d,%-49s,%10f,%10d,%-19s,%-19s,%c\n", pharmacyNode->medicineId, pharmacyNode->medicineName, pharmacyNode->medicineCost, pharmacyNode->medicineStockQuantity, pharmacyNode->medicineType, pharmacyNode->medicineDosage, pharmacyNode->medicineStatus);
+        fflush(fm);
+    }
+    printf("10000 Medicine data generated and saved to file\n");
 
 }

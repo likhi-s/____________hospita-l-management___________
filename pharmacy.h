@@ -45,5 +45,5 @@ void searchByMedicineName();
 void checkMedicineStock();
 void sortByMedicineId();
 void deleteMedicineById();
-
+void generatePharmacyData();
 #endif // PHARMACY_H

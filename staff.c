@@ -7,6 +7,9 @@
 #define STAFF_FILE_NAME "staff.txt"
 #define STAFF_USER_ID "456"
 #define STAFF_USER_PASSWORD "456"
+#define SHIFT_1 "day"
+#define SHIFT_2 "night"
+#define FILE_OPEN_ERROR 1
 
 staff *staffHead = NULL;
 staff *staffTemp;
@@ -22,15 +25,19 @@ void loadStaffDataFromFile()
         return;
     }
     rewind(fs);
-
+    int maxId =0;
     char line[256];
     while (fgets(line, sizeof(line), fs))
     {
         staffNode = (staff *)malloc(sizeof(staff));
         if (sscanf(line, "%5d,%49[^,],%19[^,],%9[^,],%10f,%14[^,],%c", &staffNode->staffId, staffNode->staffName, staffNode->staffRole, staffNode->staffShift, &staffNode->staffSalary, staffNode->staffContactNumber, &staffNode->staffStatus) == 7)
         {
-                staffNode->next = NULL;
-                insertStaffSortedByName();
+            if(staffNode->staffId > maxId)
+            {
+                maxId = staffNode->staffId;
+            }
+            staffNode->next = NULL;
+            insertStaffSortedByName();
 
         }
         else
@@ -38,6 +45,7 @@ void loadStaffDataFromFile()
             free(staffNode);
         }
     }
+    lastStaffId = maxId;
     printf("Staff data loaded from file.\n");
 }
 
@@ -50,7 +58,7 @@ void loginAsStaffManagementUser()
         if (fs == NULL)
         {
             printf("Unable to open or create file.\n");
-            exit(1);
+            exit(FILE_OPEN_ERROR);
         }
     }
 
@@ -75,6 +83,7 @@ void loginAsStaffManagementUser()
             switch (option)
             {
             case ADD_STAFF:
+                //generateStaffData();
                 addStaff();
                 break;
             case UPDATE_STAFF_DETAILS:
@@ -132,12 +141,40 @@ void addStaff()
     scanf(" %[^\n]", staffNode->staffName);
     printf("Enter Role: ");
     scanf(" %[^\n]", staffNode->staffRole);
-    printf("Enter Shift (Day/Night): ");
-    scanf(" %[^\n]", staffNode->staffShift);
+    while(true)
+    {
+        printf("Enter Shift (Day/Night): ");
+        char shift[10];
+        if(scanf("%s", &shift)==1 && strcasecmp(shift,SHIFT_1) ==0 || strcasecmp(shift,SHIFT_2) ==0)
+        {
+            strcpy (staffNode->staffShift , shift);
+            break;
+        }
+        else
+        {
+            printf("Invalid shift,Enter day /night\n");
+        }
+    }
+
     printf("Enter Salary: ");
     scanf("%f", &staffNode->staffSalary);
-    printf("Enter Contact Number: ");
-    scanf("%s", staffNode->staffContactNumber);
+
+    while(true)
+    {
+        printf("Enter Contact Number: ");
+        char contactNumber[15];
+        if (scanf("%s", contactNumber) == 1 && strlen(contactNumber) == 10)
+        {
+            strcpy(staffNode->staffContactNumber, contactNumber);
+            break;
+
+        }
+        else
+        {
+            printf("Invalid contact number,Enter 10 digit number\n");
+        }
+
+    }
 
     staffNode->staffStatus = 'A';
     staffNode->next = NULL;
@@ -280,7 +317,8 @@ void deleteStaffById()
     staffTemp = staffHead;
     while (staffTemp != NULL)
     {
-        if (staffTemp->staffId == id)
+        if (staffTemp->staffId == id && staffTemp->staffStatus == 'A')
+
         {
             staffTemp->staffStatus = 'D';
 
@@ -347,6 +385,10 @@ void searchByStaffRole()
     {
         if (strcasecmp(role, staffTemp->staffRole) == 0 && staffTemp->staffStatus == 'A')
         {
+            if(!found)
+            {
+                printf("No staff found with role: %s\n", role);
+            }
             printf("--- Staff Found ---\n");
             printf("Staff ID: %d\n", staffTemp->staffId);
             printf("Name: %s\n", staffTemp->staffName);
@@ -527,4 +569,36 @@ void displayDeletedStaffDetails()
         }
         staffTemp = staffTemp->next;
     }
+}
+
+void generateStaffData()
+{
+    fs = fopen(STAFF_FILE_NAME, "r+");
+    if (fs == NULL)
+    {
+        fs = fopen(STAFF_FILE_NAME, "w+");
+        if (fs == NULL)
+        {
+            printf("Unable to open or create file.\n");
+            exit(FILE_OPEN_ERROR);
+        }
+    }
+
+    for(int i =1; i<= 10000;i++)
+    {
+        staffNode->staffId = i ;
+        snprintf(staffNode->staffName,sizeof(staffNode->staffName),"staff%d",i);
+        snprintf(staffNode->staffRole,sizeof(staffNode->staffRole),"role%d",i % 10);
+        snprintf(staffNode->staffShift,sizeof(staffNode->staffShift),(i%2 ==0) ? "Day" :"Night");
+        staffNode->staffSalary = (i*10);
+        snprintf(staffNode->staffContactNumber, sizeof(staffNode->staffContactNumber), "900000%05d", i);
+        staffNode->staffStatus = (i % 2 ==0) ? 'A' : 'D';
+
+        fseek(fs, 0, SEEK_END);
+        fprintf(fs, "%5d,%-49s,%-19s,%-9s,%10.2f,%-14s,%c\n", staffNode->staffId, staffNode->staffName, staffNode->staffRole, staffNode->staffShift, staffNode->staffSalary, staffNode->staffContactNumber, staffNode->staffStatus);
+        fflush(fs);
+
+    }
+    printf("10,000 Staff data generated and saved to file!\n");
+
 }

@@ -1,8 +1,9 @@
 #ifndef PATIENT_H
 #define PATIENT_H
-#include "bill.h"
 
-typedef struct patient {
+
+typedef struct patient
+{
     int patientId;
     char patientName[50];
     char patientGender[10];
@@ -10,7 +11,6 @@ typedef struct patient {
     char patientAddress[50];
     char patientContactNumber[20];
     char patientEmergencyContactNumber[20];
-    int assignedRoomId;
     char patientStatus;  // 'A' for Active, 'D' for Deleted
     struct patient* next;
 } patient;
@@ -51,6 +51,7 @@ void sortPatientsById();
 void deletePatient();
 void displayDeletedRecords();
 void insertPatientSorted();
+void generatePatientData();
 
 
 #endif // PATIENT_H

@@ -50,5 +50,6 @@ void searchByDoctorSpecialization();
 void sortDoctorsById();
 void insertDoctorSortedByName();
 void deleteDoctorById();
+void generateDoctorData();
 
 #endif // DOCTOR_H
