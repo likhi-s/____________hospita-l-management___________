@@ -45,5 +45,4 @@ void searchByMedicineName();
 void checkMedicineStock();
 void sortByMedicineId();
 void deleteMedicineById();
-
 #endif // PHARMACY_H

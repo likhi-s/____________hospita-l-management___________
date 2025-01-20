@@ -61,10 +61,36 @@ void loginAsDoctorManagementUser()
 
     char userId[15];
     char userPass[15];
-    printf("User ID:\n");
-    scanf(" %[^\n]", userId);
-    printf("User Password:\n");
-    scanf(" %[^\n]", userPass);
+    while(true)
+    {
+        printf("User ID:\n");
+        char id[15];
+        if(scanf("%s",&id) ==1 && strlen(id) <=15)
+        {
+            strcpy(userId,id);
+            break;
+        }
+        else
+        {
+            printf("Invalid User Id,enter valid user id with less than 15 characters ");
+        }    
+        
+    }
+    while(true)
+    {
+        printf("User Password:\n");
+        char password[15];
+        if(scanf("%s",&password) ==1 && strlen(id) <=15);
+        {
+            strcpy(userPass,password);
+            break;
+        }
+        else
+        {
+            printf("Invalid User Id,enter valid user id with less than 15 characters ");
+        }    
+        
+    }
 
     if (strcmp(userId, USER_ID) == 0 && strcmp(userPass, USER_PASSWORD) == 0)
     {
@@ -130,11 +156,28 @@ void addDoctor()
 
     doctorNode->doctorId = ++lastDoctorId;
     printf("Generated doctor ID: %d\n",  doctorNode->doctorId);
-
-
-    printf("Enter Doctor Name: ");
-    scanf(" %[^\n]", doctorNode->doctorName);
-    printf("Enter Specialization: ");
+    while(true)
+    {
+        char name[50];
+        printf("Enter Doctor Name: ");
+        if(scanf("%s",&name) ==1 && strlen(name)<50)
+        {
+            strcpy(doctorNode->doctorName , name);
+            break;
+        }
+        else
+        {
+            printf("invalid Name enter Name containing less than 50 characters\n");
+        }
+        
+    }
+    while(true)
+    {
+        char Specialization [20];
+        
+        
+        
+    }
     scanf(" %[^\n]", doctorNode->doctorSpecialization);
     printf("Enter Consultation Fee: ");
     scanf("%f", &doctorNode->doctorConsultationFee);
@@ -144,7 +187,7 @@ void addDoctor()
         char contactNumber[15];
         if (scanf("%s", contactNumber) == 1 && strlen(contactNumber) == 10)
         {
-            strcpy(doctorTemp->doctorContactNumber, contactNumber);
+            strcpy(doctorNode->doctorContactNumber, contactNumber);
             break;
 
         }
@@ -160,7 +203,7 @@ void addDoctor()
         int experience;
         if(scanf("%d", &experience)==1 && experience >= 0 && experience < 40)
         {
-           doctorTemp->doctorExperience = experience;
+           doctorNode->doctorExperience = experience;
             break;
         }
         else
@@ -227,8 +270,21 @@ void updateDoctorDetails()
             switch (choice)
             {
             case UPDATE_DOCTOR_NAME:
-                printf("New Name: ");
-                scanf(" %[^\n]", doctorTemp->doctorName);
+                while(true)
+                {
+                    char name[50];
+                    printf("New Name: ");
+                    if(scanf("%s",&name) ==1 && strlen(name)<50)
+                    {
+                        strcpy(doctorTemp->doctorName , name);
+                        break;
+                    }
+                    else
+                    {
+                        printf("invalid Name enter Name containing less than 50 characters\n");
+                    }
+                    
+                }
                 break;
             case UPDATE_DOCTOR_SPECIALIZATION:
                 printf("New Specialization: ");

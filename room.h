@@ -48,5 +48,6 @@ void searchByRoomType();
 void checkAvailability();
 void sortByRoomId();
 void deleteRoomById();
+void generateRoomData();
 
 #endif // ROOM_H

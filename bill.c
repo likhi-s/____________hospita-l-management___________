@@ -167,13 +167,18 @@ void generateBill()
     fflush(fb);
 }
 
-void insertBillSortedById() {
-    if (billHead == NULL || billHead->billId > billNode->billId) {
+void insertBillSortedById()
+{
+    if (billHead == NULL || billHead->billId > billNode->billId)
+    {
         billNode->next = billHead;
         billHead = billNode;
-    } else {
+    }
+    else
+    {
         billTemp = billHead;
-        while (billTemp->next != NULL && billTemp->next->billId < billNode->billId) {
+        while (billTemp->next != NULL && billTemp->next->billId < billNode->billId)
+        {
             billTemp = billTemp->next;
         }
         billNode->next = billTemp->next;

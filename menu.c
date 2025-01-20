@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "patient.h"
 #include "doctor.h"
 #include "staff.h"
@@ -10,10 +11,9 @@
 #include "menu.h"
 
 
-
 void menu()
 {
-    while (1)
+    while (true)
     {
         int choice;
         printf("____Administrative Menu____\n");
