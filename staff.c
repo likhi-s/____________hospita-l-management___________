@@ -83,7 +83,6 @@ void loginAsStaffManagementUser()
             switch (option)
             {
             case ADD_STAFF:
-                //generateStaffData();
                 addStaff();
                 break;
             case UPDATE_STAFF_DETAILS:
@@ -108,7 +107,7 @@ void loginAsStaffManagementUser()
                 displayDeletedStaffDetails();
                 break;
             case EXIT_STAFF_MANAGEMENT:
-                printf("Saved data and exiting from staff menu.\n");
+                printf("Exiting from staff menu.\n");
                 fclose(fs);
                 return;
             default:
@@ -180,9 +179,12 @@ void addStaff()
     staffNode->next = NULL;
 
     insertStaffSortedByName();
+    // for(int i =0;i<10000;i++)
+    // {
+        fseek(fs, 0, SEEK_END);
+        fprintf(fs, "%5d,%-49s,%-19s,%-9s,%10.2f,%-14s,%c\n", staffNode->staffId, staffNode->staffName, staffNode->staffRole, staffNode->staffShift, staffNode->staffSalary, staffNode->staffContactNumber, staffNode->staffStatus);
 
-    fseek(fs, 0, SEEK_END);
-    fprintf(fs, "%5d,%-49s,%-19s,%-9s,%10.2f,%-14s,%c\n", staffNode->staffId, staffNode->staffName, staffNode->staffRole, staffNode->staffShift, staffNode->staffSalary, staffNode->staffContactNumber, staffNode->staffStatus);
+    // }
     fflush(fs);
     printf("Staff added successfully and saved to file!\n");
 }
@@ -209,6 +211,7 @@ void insertStaffSortedByName()
 void updateStaffDetails()
 {
     int id, choice;
+    int found = 0;
     printf("Enter Staff ID to update: ");
     scanf("%d", &id);
 
@@ -217,6 +220,7 @@ void updateStaffDetails()
     {
         if (staffTemp->staffId == id && staffTemp->staffStatus == 'A')
         {
+            found =1;
             printf("Updating details for %s...\n", staffTemp->staffName);
             printf("1. Name\n2. Role\n3. Shift\n4. Salary\n5. Contact Number\n");
             printf("Enter your choice: ");
@@ -233,16 +237,42 @@ void updateStaffDetails()
                 scanf(" %[^\n]", staffTemp->staffRole);
                 break;
             case UPDATE_STAFF_SHIFT:
-                printf("New Shift: ");
-                scanf(" %[^\n]", staffTemp->staffShift);
+                while(true)
+                {
+                    printf("Enter Shift (Day/Night): ");
+                    char shift[10];
+                    if(scanf("%s", &shift)==1 && strcasecmp(shift,SHIFT_1) ==0 || strcasecmp(shift,SHIFT_2) ==0)
+                    {
+                        strcpy (staffTemp->staffShift , shift);
+                        break;
+                    }
+                    else
+                    {
+                        printf("Invalid shift,Enter day /night\n");
+                    }
+                }
                 break;
             case UPDATE_STAFF_SALARY:
                 printf("New Salary: ");
                 scanf("%f", &staffTemp->staffSalary);
                 break;
             case UPDATE_STAFF_CONTACT_NUMBER:
-                printf("New Contact Number: ");
-                scanf("%s", staffTemp->staffContactNumber);
+                while(true)
+                {
+                    printf("Enter Contact Number: ");
+                    char contactNumber[15];
+                    if (scanf("%s", contactNumber) == 1 && strlen(contactNumber) == 10)
+                    {
+                        strcpy(staffTemp->staffContactNumber, contactNumber);
+                        break;
+
+                    }
+                    else
+                    {
+                        printf("Invalid contact number,Enter 10 digit number\n");
+                    }
+
+                }
                 break;
             default:
                 printf("Invalid choice.\n");
@@ -253,7 +283,6 @@ void updateStaffDetails()
             rewind(fs);
             char line[256];
             long position = 0;
-            int found =0;
             while (fgets(line, sizeof(line), fs))
             {
                 int existingId;
@@ -267,44 +296,45 @@ void updateStaffDetails()
                     switch (choice)
                     {
                     case UPDATE_STAFF_NAME:
-                        fseek(fs,position+5,SEEK_SET);
+                        fseek(fs,position+sizeof(staffTemp->staffId)+1,SEEK_SET);
                         fprintf(fs,"%-49s",staffTemp->staffName);
                         break;
                     case UPDATE_STAFF_ROLE:
-                        fseek(fs,position+55,SEEK_SET);
+                        fseek(fs,position+sizeof(staffTemp->staffId)+sizeof(staffTemp->staffName)+1,SEEK_SET);
                         fprintf(fs,"%-19s",staffTemp->staffRole);
                         break;
                     case UPDATE_STAFF_SHIFT:
-                        fseek(fs,position+75,SEEK_SET);
+                        fseek(fs,position+sizeof(staffTemp->staffId)+sizeof(staffTemp->staffName)+sizeof(staffTemp->staffRole)+1,SEEK_SET);
                         fprintf(fs,"%-9s",staffTemp->staffShift);
                         break;
                     case UPDATE_STAFF_SALARY:
-                        fseek(fs,position+85,SEEK_SET);
+                        fseek(fs,position+sizeof(staffTemp->staffId)+sizeof(staffTemp->staffName)+sizeof(staffTemp->staffRole)+sizeof(staffTemp->staffShift)+1,SEEK_SET);
                         fprintf(fs,"%10.2f",staffTemp->staffSalary);
                         break;
                     case UPDATE_STAFF_CONTACT_NUMBER:
-                        fseek(fs,position+96,SEEK_SET);
+                        fseek(fs,position+sizeof(staffTemp->staffId)+sizeof(staffTemp->staffName)+sizeof(staffTemp->staffRole)+sizeof(staffTemp->staffShift)+sizeof(staffTemp->staffSalary)+8,SEEK_SET);
                         fprintf(fs,"%-14s",staffTemp->staffContactNumber);
                         break;
                     }
-
-
+                    printf("staff details updated sucessfully in file\n");
                     fflush(fs);
-
                     break;
                 }
             }
             if(!found)
             {
-                printf("Staff with ID %d not found.\n",id);
+                printf("Staff with ID %d not found in file.\n",id);
             }
-            fclose(fs);
             return;
         }
         staffTemp = staffTemp->next;
     }
+    if(!found)
+    {
+        printf("Staff with ID %d not found.\n", id);
 
-    printf("Staff with ID %d not found.\n", id);
+    }
+
 }
 
 
@@ -332,7 +362,7 @@ void deleteStaffById()
                 if (existingId == id)
                 {
                     position = ftell(fs) - strlen(line);
-                    fseek(fs, position + 111, SEEK_SET);
+                    fseek(fs,position+sizeof(staffTemp->staffId)+sizeof(staffTemp->staffName)+sizeof(staffTemp->staffRole)+sizeof(staffTemp->staffShift)+sizeof(staffTemp->staffSalary)+sizeof(staffTemp->staffContactNumber)+8,SEEK_SET);
                     fprintf(fs, "%c", 'D');
                     printf("Staff with ID %d marked as deleted.\n", id);
 
@@ -385,10 +415,7 @@ void searchByStaffRole()
     {
         if (strcasecmp(role, staffTemp->staffRole) == 0 && staffTemp->staffStatus == 'A')
         {
-            if(!found)
-            {
-                printf("No staff found with role: %s\n", role);
-            }
+
             printf("--- Staff Found ---\n");
             printf("Staff ID: %d\n", staffTemp->staffId);
             printf("Name: %s\n", staffTemp->staffName);
@@ -432,6 +459,36 @@ void displayStaffDetails()
         }
         staffTemp = staffTemp->next;
     }
+}
+
+void displayDeletedStaffDetails()
+{
+    if (staffHead == NULL)
+    {
+        printf("No deleted staff records to display.\n");
+
+    }
+    else
+    {
+        staffTemp = staffHead;
+        printf("--- Deleted Staff Details ---\n");
+        while (staffTemp != NULL)
+        {
+            if (staffTemp->staffStatus == 'D')
+            {
+                printf("Staff ID: %d\n", staffTemp->staffId);
+                printf("Name: %s\n", staffTemp->staffName);
+                printf("Role: %s\n", staffTemp->staffRole);
+                printf("Shift: %s\n", staffTemp->staffShift);
+                printf("Salary: %.2f\n", staffTemp->staffSalary);
+                printf("Contact Number: %s\n", staffTemp->staffContactNumber);
+                printf("\n");
+            }
+            staffTemp = staffTemp->next;
+        }
+    }
+
+
 }
 
 
@@ -545,60 +602,4 @@ void sortByStaffId()
     }
 
 }
-void displayDeletedStaffDetails()
-{
-    if (staffHead == NULL)
-    {
-        printf("No deleted staff records to display.\n");
-        return;
-    }
 
-    staffTemp = staffHead;
-    printf("--- Deleted Staff Details ---\n");
-    while (staffTemp != NULL)
-    {
-        if (staffTemp->staffStatus == 'D')
-        {
-            printf("Staff ID: %d\n", staffTemp->staffId);
-            printf("Name: %s\n", staffTemp->staffName);
-            printf("Role: %s\n", staffTemp->staffRole);
-            printf("Shift: %s\n", staffTemp->staffShift);
-            printf("Salary: %.2f\n", staffTemp->staffSalary);
-            printf("Contact Number: %s\n", staffTemp->staffContactNumber);
-            printf("\n");
-        }
-        staffTemp = staffTemp->next;
-    }
-}
-
-void generateStaffData()
-{
-    fs = fopen(STAFF_FILE_NAME, "r+");
-    if (fs == NULL)
-    {
-        fs = fopen(STAFF_FILE_NAME, "w+");
-        if (fs == NULL)
-        {
-            printf("Unable to open or create file.\n");
-            exit(FILE_OPEN_ERROR);
-        }
-    }
-
-    for(int i =1; i<= 10000;i++)
-    {
-        staffNode->staffId = i ;
-        snprintf(staffNode->staffName,sizeof(staffNode->staffName),"staff%d",i);
-        snprintf(staffNode->staffRole,sizeof(staffNode->staffRole),"role%d",i % 10);
-        snprintf(staffNode->staffShift,sizeof(staffNode->staffShift),(i%2 ==0) ? "Day" :"Night");
-        staffNode->staffSalary = (i*10);
-        snprintf(staffNode->staffContactNumber, sizeof(staffNode->staffContactNumber), "900000%05d", i);
-        staffNode->staffStatus = (i % 2 ==0) ? 'A' : 'D';
-
-        fseek(fs, 0, SEEK_END);
-        fprintf(fs, "%5d,%-49s,%-19s,%-9s,%10.2f,%-14s,%c\n", staffNode->staffId, staffNode->staffName, staffNode->staffRole, staffNode->staffShift, staffNode->staffSalary, staffNode->staffContactNumber, staffNode->staffStatus);
-        fflush(fs);
-
-    }
-    printf("10,000 Staff data generated and saved to file!\n");
-
-}

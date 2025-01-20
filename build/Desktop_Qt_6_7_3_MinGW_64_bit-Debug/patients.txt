@@ -1,5 +1,5 @@
-    1,PALLAVI                                          ,FEMALE   , 25,KOLAR.                                           ,9743076146         ,9743076146         ,A
-    2,LIKHITHA                                         ,FEMALE   , 23,TUMKUR                                           ,7899917009         ,7899917009         ,D
+    1,PALLAV                                           ,FEMALE   , 23,KOLAR.                                           ,9743076146         ,9743076146         ,D
+    2,PALLAVI                                          ,FEMALE   , 26,TUMKUR                                           ,7899917009         ,7899917009         ,D
     1,likhitha                                         ,female   , 23,dfghjk                                           ,8745145121         ,1236547891         ,A
     1,likhitha                                         ,female   , 23,dfghjk                                           ,8745145121         ,1236547891         ,A
     1,likhitha                                         ,female   , 23,dfghjk                                           ,8745145121         ,1236547891         ,A

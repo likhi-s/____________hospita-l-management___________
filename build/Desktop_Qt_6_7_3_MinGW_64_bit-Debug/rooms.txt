@@ -1,3 +1,2 @@
-    2,GENERAL  ,        30,        25,VACANT   ,   2000.00,A
-    1,fghj     ,         0,         0,fds      ,      0.00,A
+    1,general  ,        20,         0,fds      ,   1500.00,D
     2,f        ,         0,         0,f        ,      4.00,A

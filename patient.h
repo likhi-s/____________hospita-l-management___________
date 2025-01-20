@@ -51,7 +51,6 @@ void sortPatientsById();
 void deletePatient();
 void displayDeletedRecords();
 void insertPatientSorted();
-void generatePatientData();
 
 
 #endif // PATIENT_H

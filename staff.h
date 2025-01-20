@@ -45,6 +45,5 @@ void searchByStaffId();
 void searchByStaffRole();
 void sortByStaffId();
 void deleteStaffById();
-void generateStaffData();
 
 #endif // STAFF_H

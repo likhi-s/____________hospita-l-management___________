@@ -1,5 +1,5 @@
-    1,doctor1                                          ,Speci2             ,   1001.00,9000000001    ,  2,Qualification2                                   ,D
-    2,doctor2                                          ,Speci3             ,   1002.00,9000000002    ,  3,Qualification3                                   ,A
+    1,LIKHITHA                                         ,ortho              ,   1974.07,6146    001   ,  2,Qualification2                                   ,A
+    2,doctor2                                          ,ortho              ,   1002.00,9743076146    , 13,Qualifi: MBBS MD                                 ,A
     3,doctor3                                          ,Speci4             ,   1003.00,9000000003    ,  4,Qualification4                                   ,D
     4,doctor4                                          ,Speci5             ,   1004.00,9000000004    ,  5,Qualification5                                   ,A
     5,doctor5                                          ,Speci6             ,   1005.00,9000000005    ,  6,Qualification6                                   ,D

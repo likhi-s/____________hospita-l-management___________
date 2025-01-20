@@ -7,6 +7,9 @@
 #define ROOM_USER_ID "123"
 #define ROOM_USER_PASSWORD "123"
 #define ROOM_FILE_NAME "rooms.txt"
+#define FILE_OPEN_ERROR 1
+#define STATUS_1 "Occupied"
+#define STATUS_2 "Vacant"
 
 room *roomHead = NULL;
 room *roomTemp;
@@ -23,7 +26,7 @@ void loadRoomDataFromFile()
         if (rm == NULL)
         {
             printf("Unable to open or create file.\n");
-            exit(1);
+            exit(FILE_OPEN_ERROR);
         }
     }
     if (rm == NULL)
@@ -75,7 +78,6 @@ void loginAsRoomManagementUser()
             switch (option)
             {
             case ADD_ROOM:
-                generateRoomData();
                 addRoom();
                 break;
             case UPDATE_ROOM_DETAILS:
@@ -131,15 +133,55 @@ void addRoom()
     printf("Generated Room ID: %d\n", roomNode->roomId);
 
 
-
     printf("Enter Room Type (icu/general/private): ");
     scanf("%s", roomNode->roomType);
-    printf("Enter Bed Count: ");
-    scanf("%d", &roomNode->bedCount);
-    printf("Enter Available Beds: ");
-    scanf("%d", &roomNode->availableBeds);
-    printf("Enter Bed Status (occupied/vacant): ");
-    scanf("%s", roomNode->bedStatus);
+    while(true)
+    {
+        printf("Enter Bed Count: ");
+        int count =0;
+        if(scanf("%d", &count)==1 && count >=0 )
+        {
+            roomNode->bedCount = count;
+            break;
+        }
+        else
+        {
+            printf("Invalid count ,enter positive number\n");
+        }
+
+    }
+
+    while(true)
+    {
+        printf("Enter Available Beds: ");
+        int beds =0;
+        if(scanf("%d", &beds) ==1 && beds >=0)
+        {
+            roomNode->availableBeds = beds;
+            break;
+        }
+        else
+        {
+            printf("Invalid count ,enter positive number\n");
+
+        }
+
+    }
+    while(true)
+    {
+        printf("Enter Bed Status (occupied/vacant): ");
+        char status[10];
+        if(scanf("%s",&status)==1 && strcasecmp(status,STATUS_1)==0 || strcasecmp(status,STATUS_2)==0)
+        {
+            strcpy(roomNode->bedStatus, status);
+            break;
+        }
+        else
+        {
+            printf("Invalid Status,Enter Occupied / Vacant\n");
+        }
+
+    }
     printf("Enter Room Fee: ");
     scanf("%f", &roomNode->roomFee);
 
@@ -147,9 +189,12 @@ void addRoom()
     roomNode->next = NULL;
 
     insertRoomSorted();
+    // for(int i =0; i<10000; i++)
+    // {
+        fseek(rm, 0, SEEK_END);
+        fprintf(rm, "%5d,%-9s,%10d,%10d,%-9s,%10.2f,%c\n", roomNode->roomId, roomNode->roomType, roomNode->bedCount, roomNode->availableBeds, roomNode->bedStatus, roomNode->roomFee, roomNode->roomStatus);
 
-    fseek(rm, 0, SEEK_END);
-    fprintf(rm, "%5d,%-9s,%10d,%10d,%-9s,%10.2f,%c\n", roomNode->roomId, roomNode->roomType, roomNode->bedCount, roomNode->availableBeds, roomNode->bedStatus, roomNode->roomFee, roomNode->roomStatus);
+    // }
     fflush(rm);
     printf("Room added successfully and saved to file!\n");
 }
@@ -163,7 +208,7 @@ void deleteRoomById()
     roomTemp = roomHead;
     while (roomTemp != NULL)
     {
-        if (roomTemp->roomId == id)
+        if (roomTemp->roomId == id && roomTemp->roomStatus == 'A')
         {
             roomTemp->roomStatus = 'D';
 
@@ -177,7 +222,7 @@ void deleteRoomById()
                 if (existingId == id)
                 {
                     position = ftell(rm) - strlen(line);
-                    fseek(rm, position +58, SEEK_SET);
+                    fseek(rm, position + sizeof(roomTemp->roomId)+sizeof(roomTemp->roomType)+sizeof(roomTemp->bedCount)+sizeof(roomTemp->availableBeds)+sizeof(roomTemp->bedStatus)+sizeof(roomTemp->roomFee)+22, SEEK_SET);
                     fprintf(rm, "%c", 'D');
                     printf("Room with ID %d marked as deleted.\n", id);
 
@@ -234,16 +279,56 @@ void updateRoomDetails()
                 scanf("%s", roomTemp->roomType);
                 break;
             case UPDATE_BED_COUNT:
-                printf("New Bed Count: ");
-                scanf("%d", &roomTemp->bedCount);
+                while(true)
+                {
+                    printf("Enter Bed Count: ");
+                    int count =0;
+                    if(scanf("%d", &count)==1 && count >=0 )
+                    {
+                        roomTemp->bedCount = count;
+                        break;
+                    }
+                    else
+                    {
+                        printf("Invalid count ,enter positive number\n");
+                    }
+
+                }
                 break;
             case UPDATE_AVAILABLE_BEDS:
-                printf("New Available Beds: ");
-                scanf("%d", &roomTemp->availableBeds);
+                while(true)
+                {
+                    printf("Enter Available Beds: ");
+                    int beds =0;
+                    if(scanf("%d", &beds) ==1 && beds >=0)
+                    {
+                        roomTemp->availableBeds = beds;
+                        break;
+                    }
+                    else
+                    {
+                        printf("Invalid count ,enter positive number\n");
+
+                    }
+
+                }
                 break;
             case UPDATE_BED_STATUS:
-                printf("New Bed Status: ");
-                scanf("%s", roomTemp->bedStatus);
+                while(true)
+                {
+                    printf("Enter Bed Status (occupied/vacant): ");
+                    char status[10];
+                    if(scanf("%s",&status)==1 && strcasecmp(status,STATUS_1)==0 || strcasecmp(status,STATUS_2)==0)
+                    {
+                        strcpy(roomTemp->bedStatus, status);
+                        break;
+                    }
+                    else
+                    {
+                        printf("Invalid Status,Enter Occupied / Vacant\n");
+                    }
+
+                }
                 break;
             case UPDATE_ROOM_FEE:
                 printf("New Room Fee: ");
@@ -282,23 +367,23 @@ void updateRoomDetails()
                     switch (choice)
                     {
                     case UPDATE_ROOM_TYPE:
-                        fseek(rm, position + 5, SEEK_SET);
+                        fseek(rm, position + sizeof(roomTemp->roomId)+1, SEEK_SET);
                         fprintf(rm, "%-9s", roomTemp->roomType);
                         break;
                     case UPDATE_BED_COUNT:
-                        fseek(rm, position + 15, SEEK_SET);
+                        fseek(rm, position + sizeof(roomTemp->roomId)+sizeof(roomTemp->roomType)+1, SEEK_SET);
                         fprintf(rm, "%10d", roomTemp->bedCount);
                         break;
                     case UPDATE_AVAILABLE_BEDS:
-                        fseek(rm, position + 26, SEEK_SET);
+                        fseek(rm, position + sizeof(roomTemp->roomId)+sizeof(roomTemp->roomType)+sizeof(roomTemp->bedCount)+8, SEEK_SET);
                         fprintf(rm, "%10d", roomTemp->availableBeds);
                         break;
                     case UPDATE_BED_STATUS:
-                        fseek(rm, position + 37, SEEK_SET);
+                        fseek(rm, position + sizeof(roomTemp->roomId)+sizeof(roomTemp->roomType)+sizeof(roomTemp->bedCount)+sizeof(roomTemp->availableBeds)+15, SEEK_SET);
                         fprintf(rm, "%-9s", roomTemp->bedStatus);
                         break;
                     case UPDATE_ROOM_FEE:
-                        fseek(rm, position + 47, SEEK_SET);
+                        fseek(rm, position + sizeof(roomTemp->roomId)+sizeof(roomTemp->roomType)+sizeof(roomTemp->bedCount)+sizeof(roomTemp->availableBeds)+sizeof(roomTemp->bedStatus)+15, SEEK_SET);
                         fprintf(rm, "%10.2f", roomTemp->roomFee);
                         break;
                     }
@@ -565,10 +650,4 @@ void displayDeletedRooms()
 
 }
 
-void generateRoomData()
-{
-    for(int i =1; i<=10000; i++)
-    {
-        addRoom();
-    }
-}
+

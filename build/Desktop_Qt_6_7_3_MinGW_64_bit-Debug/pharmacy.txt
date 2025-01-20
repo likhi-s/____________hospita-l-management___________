@@ -1,9 +1,9 @@
-    1,medicine1                                        ,  2.000000,       100,injection          ,1mg                ,D
+    1,medicine1                                        ,  2.000000,       100,tablet             ,300                ,D
     2,medicine2                                        ,  3.000000,       100,tablet             ,2mg                ,D
     3,medicine3                                        ,  4.000000,       100,injection          ,3mg                ,D
-    4,medicine4                                        ,  5.000000,       100,tablet             ,4mg                ,A
+    4,dolo                                             , 30.000000,       100,tablet             ,4mg                ,A
     5,medicine5                                        ,  6.000000,       100,injection          ,5mg                ,D
-    6,medicine6                                        ,  7.000000,       100,tablet             ,6mg                ,A
+    6,medicine6                                        ,  7.000000,       100,ttablet            ,6mg                ,A
     7,medicine7                                        ,  8.000000,       100,injection          ,7mg                ,D
     8,medicine8                                        ,  9.000000,       100,tablet             ,8mg                ,A
     9,medicine9                                        , 10.000000,       100,injection          ,9mg                ,D

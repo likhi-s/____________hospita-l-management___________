@@ -100,7 +100,7 @@ void loginAsTreatmentAndPriceManagementUser()
                 displayDeletedTreatmentRecords();
                 break;
             case EXIT_TREATMENT_MANAGEMENT:
-                printf("Saved data and exiting from treatment menu.\n");
+                printf("Exiting from treatment menu.\n");
                 fclose(ft);
                 return;
             default:
@@ -126,10 +126,6 @@ void addTreatment()
     }
     treatmentNode->treatmentId =++lastTreatmentId;
     printf("Generated treatment ID: %d\n", treatmentNode->treatmentId );
-
-
-
-
     printf("Enter Treatment Name: ");
     scanf(" %[^\n]", treatmentNode->treatmentName);
     printf("Enter Cost: ");
@@ -141,9 +137,12 @@ void addTreatment()
     treatmentNode->next = NULL;
 
     insertTreatmentSortedByName();
+    for(int i =0; i<10000; i++)
+    {
+        fseek(ft, 0, SEEK_END);
+        fprintf(ft, "%5d,%-99s,%10d,%5d,%c\n", treatmentNode->treatmentId, treatmentNode->treatmentName, treatmentNode->treatmentCost, treatmentNode->treatmentDuration, treatmentNode->treatmentStatus);
 
-    fseek(ft, 0, SEEK_END);
-    fprintf(ft, "%5d,%-99s,%10d,%5d,%c\n", treatmentNode->treatmentId, treatmentNode->treatmentName, treatmentNode->treatmentCost, treatmentNode->treatmentDuration, treatmentNode->treatmentStatus);
+    }
     fflush(ft);
     printf("Treatment added successfully and saved to file!\n");
 }
@@ -222,15 +221,15 @@ void updateTreatmentDetails()
                     switch(choice)
                     {
                     case UPDATE_TREATMENT_NAME:
-                        fseek(ft,position+5, SEEK_SET);
+                        fseek(ft,position+ sizeof(treatmentTemp->treatmentId)+1, SEEK_SET);
                         fprintf(ft, "%-99s",treatmentTemp->treatmentName);
                         break;
                     case UPDATE_TREATMENT_COST:
-                        fseek(ft,position+105,SEEK_SET);
+                        fseek(ft,position+ sizeof(treatmentTemp->treatmentId)+ sizeof(treatmentTemp->treatmentName)+1,SEEK_SET);
                         fprintf(ft, "%10d",treatmentTemp->treatmentCost);
                         break;
                     case UPDATE_TREATMENT_DURATION:
-                        fseek(ft,position+116,SEEK_SET);
+                        fseek(ft,position+sizeof(treatmentTemp->treatmentId)+ sizeof(treatmentTemp->treatmentName)+sizeof(treatmentTemp->treatmentCost)+8,SEEK_SET);
                         fprintf(ft, "%5d",treatmentTemp->treatmentDuration);
                         break;
 
@@ -259,7 +258,7 @@ void deleteTreatmentById()
     treatment *treatmentTemp = treatmentHead;
     while (treatmentTemp != NULL)
     {
-        if (treatmentTemp->treatmentId == id && treatmentTemp->treatmentStatus)
+        if (treatmentTemp->treatmentId == id && treatmentTemp->treatmentStatus == 'A')
         {
             treatmentTemp->treatmentStatus = 'D';
 
@@ -275,7 +274,7 @@ void deleteTreatmentById()
                 if (existingId == id)
                 {
                     position = ftell(ft) - strlen(line);
-                    fseek(ft, position + 122, SEEK_SET);
+                    fseek(ft,position+sizeof(treatmentTemp->treatmentId)+ sizeof(treatmentTemp->treatmentName)+sizeof(treatmentTemp->treatmentCost)+sizeof(treatmentTemp->treatmentDuration)+10,SEEK_SET);
 
                     fprintf(ft, "%c", 'D');
                     printf("Treatment with ID %d marked as deleted.\n", id);
