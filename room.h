@@ -2,17 +2,21 @@
 #ifndef ROOM_H
 #define ROOM_H
 
+#define MAX_FIXED_ROOM_TYPE 10
+#define MAX_FIXED_BED_STATUS 10
+
 typedef struct roomManagement
 {
     int roomId;
-    char roomType[10]; //icu/general/private
+    char roomType[MAX_FIXED_ROOM_TYPE];
     int bedCount;
     int availableBeds;
-    char bedStatus[10];// occupied/vacant
+    char bedStatus[MAX_FIXED_BED_STATUS];
     float roomFee;
     char roomStatus;
     struct roomManagement *next;
-}room;
+} room;
+
 
 
 enum RoomManagementOptions

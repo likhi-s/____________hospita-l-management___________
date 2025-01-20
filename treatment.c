@@ -57,10 +57,36 @@ void loginAsTreatmentAndPriceManagementUser()
 
     char userId[15];
     char userPass[15];
-    printf("User ID:\n");
-    scanf(" %[^\n]", userId);
-    printf("User Password:\n");
-    scanf(" %[^\n]", userPass);
+    while(true)
+    {
+        printf("User ID:\n");
+        char id[15];
+        if(scanf("%s",&id) ==1 && strlen(id) <=15)
+        {
+            strcpy(userId,id);
+            break;
+        }
+        else
+        {
+            printf("Invalid User Id,enter valid user id with less than 15 characters\n ");
+        }
+
+    }
+    while(true)
+    {
+        printf("User Password:\n");
+        char password[15];
+        if(scanf("%s",&password) ==1 && strlen(password) <=15)
+        {
+            strcpy(userPass,password);
+            break;
+        }
+        else
+        {
+            printf("Invalid User password,enter valid user password with less than 15 characters\n ");
+        }
+
+    }
 
     if (strcmp(userId, TREATMENT_USER_ID) == 0 && strcmp(userPass, TREATMENT_USER_PASSWORD) == 0)
     {
@@ -126,12 +152,54 @@ void addTreatment()
     }
     treatmentNode->treatmentId =++lastTreatmentId;
     printf("Generated treatment ID: %d\n", treatmentNode->treatmentId );
-    printf("Enter Treatment Name: ");
-    scanf(" %[^\n]", treatmentNode->treatmentName);
-    printf("Enter Cost: ");
-    scanf("%d", &treatmentNode->treatmentCost);
-    printf("Enter Duration (in days): ");
-    scanf("%d", &treatmentNode->treatmentDuration);
+
+    while(true)
+    {
+        char name[MAX_FIXED_TREATMENT_NAME];
+        printf("Enter Treatment Name: ");
+        if(scanf("%s",name) ==1 && strlen(name)<MAX_FIXED_TREATMENT_NAME)
+        {
+            strcpy(treatmentNode->treatmentName , name);
+            break;
+        }
+        else
+        {
+            printf("invalid treatment Name ,enter Name less than 50 characters\n");
+        }
+
+    }
+    while(true)
+    {
+        int cost;
+        printf("Enter Cost: ");
+        if(scanf("%d",&cost) ==1 && cost >0)
+        {
+            treatmentNode->treatmentCost = cost;
+            break;
+        }
+        else
+        {
+            printf("invalid cost,enter cost greater than 0\n");
+        }
+    }
+
+    while(true)
+    {
+        int duration;
+        printf("Enter Duration (in days): ");
+        if(scanf("%d",&duration) ==1 && duration>0)
+        {
+            treatmentNode->treatmentDuration = duration;
+            break;
+        }
+        else
+        {
+            printf("invalid duration,enter duration greater than 0\n");
+
+        }
+
+    }
+
 
     treatmentNode->treatmentStatus = 'A';
     treatmentNode->next = NULL;
@@ -185,16 +253,57 @@ void updateTreatmentDetails()
             switch (choice)
             {
             case UPDATE_TREATMENT_NAME:
-                printf("New Name: ");
-                scanf(" %[^\n]", treatmentTemp->treatmentName);
+                while(true)
+                {
+                    char name[MAX_FIXED_TREATMENT_NAME];
+                    printf("New Name: ");
+                    if(scanf("%s",name) ==1 && strlen(name)<MAX_FIXED_TREATMENT_NAME)
+                    {
+                        strcpy(treatmentTemp->treatmentName , name);
+                        break;
+                    }
+                    else
+                    {
+                        printf("invalid treatment Name ,enter Name less than 50 characters\n");
+                    }
+
+                }
                 break;
             case UPDATE_TREATMENT_COST:
-                printf("New Cost: ");
-                scanf("%d", &treatmentTemp->treatmentCost);
+                while(true)
+                {
+                    int cost;
+                    printf("New Cost: ");
+                    if(scanf("%d",&cost) ==1 && cost >0)
+                    {
+                        treatmentTemp->treatmentCost = cost;
+                        break;
+                    }
+                    else
+                    {
+                        printf("invalid cost,enter cost greater than 0\n");
+                    }
+                }
+
                 break;
             case UPDATE_TREATMENT_DURATION:
-                printf("New Duration (in days): ");
-                scanf("%d", &treatmentTemp->treatmentDuration);
+                while(true)
+                {
+                    int duration;
+                    printf("New Duration (in days): ");
+                    if(scanf("%d",&duration) ==1 && duration>0)
+                    {
+                        treatmentTemp->treatmentDuration = duration;
+                        break;
+                    }
+                    else
+                    {
+                        printf("invalid duration,enter duration greater than 0\n");
+
+                    }
+
+                }
+
                 break;
             default:
                 printf("Invalid choice.\n");

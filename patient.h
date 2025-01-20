@@ -2,18 +2,25 @@
 #define PATIENT_H
 
 
+#define MAX_FIXED_PATIENT_NAME 50
+#define MAX_FIXED_GENDER 10
+#define MAX_FIXED_ADDRESS 50
+#define MAX_FIXED_CONTACT_NUMBER 20
+#define MAX_FIXED_EMERGENCY_CONTACT 20
+
 typedef struct patient
 {
     int patientId;
-    char patientName[50];
-    char patientGender[10];
+    char patientName[MAX_FIXED_PATIENT_NAME];
+    char patientGender[MAX_FIXED_GENDER];
     int patientAge;
-    char patientAddress[50];
-    char patientContactNumber[20];
-    char patientEmergencyContactNumber[20];
-    char patientStatus;  // 'A' for Active, 'D' for Deleted
+    char patientAddress[MAX_FIXED_ADDRESS];
+    char patientContactNumber[MAX_FIXED_CONTACT_NUMBER];
+    char patientEmergencyContactNumber[MAX_FIXED_EMERGENCY_CONTACT];
+    char patientStatus;
     struct patient* next;
 } patient;
+
 
 
 enum PatientManagementMenu

@@ -64,11 +64,36 @@ void loginAsPatientManagementUser()
 
     char userId[15];
     char userPass[15];
-    printf("User ID:\n");
-    scanf(" %[^\n]", userId);
-    printf("User Password:\n");
-    scanf(" %[^\n]", userPass);
+    while(true)
+    {
+        printf("User ID:\n");
+        char id[15];
+        if(scanf("%s",&id) ==1 && strlen(id) <=15)
+        {
+            strcpy(userId,id);
+            break;
+        }
+        else
+        {
+            printf("Invalid User Id,enter valid user id with less than 15 characters \n");
+        }
 
+    }
+    while(true)
+    {
+        printf("User Password:\n");
+        char password[15];
+        if(scanf("%s",&password) ==1 && strlen(password) <=15)
+        {
+            strcpy(userPass,password);
+            break;
+        }
+        else
+        {
+            printf("Invalid User password,enter valid user id with less than 15 characters \n ");
+        }
+
+    }
     if (strcmp(userId, USER_ID) == 0 && strcmp(userPass, USER_PASSWORD) == 0)
     {
         loadPatientDataFromFile();
@@ -134,10 +159,38 @@ void registerPatient()
 
     patientNode->patientId = ++lastPatientId;
     printf("Generated Patient Id: %d\n",patientNode->patientId);
-    printf("Enter Patient Name: ");
-    scanf(" %[^\n]", patientNode->patientName);
-    printf("Enter Gender: ");
-    scanf("%s", patientNode->patientGender);
+    while(true)
+    {
+        char name[MAX_FIXED_PATIENT_NAME];
+        printf("Enter Patient Name: ");
+        if(scanf("%s",name) ==1 && strlen(name)<MAX_FIXED_PATIENT_NAME)
+        {
+            strcpy(patientNode->patientName , name);
+            break;
+        }
+        else
+        {
+            printf("invalid patient Name ,enter Name less than 50 characters\n");
+        }
+
+    }
+
+    while(true)
+    {
+        char gender[MAX_FIXED_GENDER];
+        printf("Enter Gender: ");
+        if(scanf("%s",gender) == 1 && strlen(gender) < MAX_FIXED_GENDER )
+        {
+            strcpy(patientNode->patientGender ,gender);
+            break;
+        }
+        else
+        {
+            printf("invalid patient Gender ,enter gender less than 10 characters\n");
+        }
+
+    }
+
     while(true)
     {
         printf("Enter Age: ");
@@ -153,13 +206,27 @@ void registerPatient()
         }
 
     }
+    while(true)
+    {
+        printf("Enter Address: ");
+        char address[MAX_FIXED_ADDRESS];
+        if (scanf("%s", address) == 1 && strlen(address) <MAX_FIXED_ADDRESS)
+        {
+            strcpy(patientNode->patientAddress, address);
+            break;
 
-    printf("Enter Address: ");
-    scanf(" %[^\n]", patientNode->patientAddress);
+        }
+        else
+        {
+            printf("Invalid Address ,Enter address with 50 characters\n");
+        }
+
+
+    }
     while(true)
     {
         printf("Enter Contact Number: ");
-        char contactNumber[15];
+        char contactNumber[MAX_FIXED_CONTACT_NUMBER];
         if (scanf("%s", contactNumber) == 1 && strlen(contactNumber) == 10)
         {
             strcpy(patientNode->patientContactNumber, contactNumber);
@@ -176,7 +243,7 @@ void registerPatient()
     while(true)
     {
         printf("Enter Emergency Contact Number: ");
-        char contactNumber[15];
+        char contactNumber[MAX_FIXED_EMERGENCY_CONTACT];
         if (scanf("%s", contactNumber) == 1 && strlen(contactNumber) == 10)
         {
             strcpy(patientNode->patientEmergencyContactNumber, contactNumber);
@@ -283,12 +350,40 @@ void updatePatientDetails()
             switch (choice)
             {
             case UPDATE_PATIENT_NAME:
-                printf("New Name: ");
-                scanf(" %[^\n]", patientTemp->patientName);
+                while(true)
+                {
+                    char name[MAX_FIXED_PATIENT_NAME];
+                    printf("New Name: ");
+                    if(scanf("%s",name) ==1 && strlen(name)<MAX_FIXED_PATIENT_NAME)
+                    {
+                        strcpy(patientTemp->patientName , name);
+                        break;
+                    }
+                    else
+                    {
+                        printf("invalid patient Name ,enter Name less than 50 characters\n");
+                    }
+
+                }
+
                 break;
             case UPDATE_PATIENT_GENDER:
-                printf("New Gender: ");
-                scanf("%s", patientTemp->patientGender);
+                while(true)
+                {
+                    char gender[MAX_FIXED_GENDER];
+                    printf("New Gender: ");
+                    if(scanf("%s",gender) == 1 && strlen(gender) < MAX_FIXED_GENDER )
+                    {
+                        strcpy(patientTemp->patientGender ,gender);
+                        break;
+                    }
+                    else
+                    {
+                        printf("invalid patient Gender ,enter gender less than 10 characters\n");
+                    }
+
+                }
+
                 break;
             case UPDATE_PATIENT_AGE:
                 while(true)
@@ -308,14 +403,29 @@ void updatePatientDetails()
 
                 break;
             case UPDATE_PATIENT_ADDRESS:
-                printf("New Address: ");
-                scanf(" %[^\n]", patientTemp->patientAddress);
+                while(true)
+                {
+                    printf("New Address: ");
+                    char address[MAX_FIXED_ADDRESS];
+                    if (scanf("%s", address) == 1 && strlen(address) <MAX_FIXED_ADDRESS)
+                    {
+                        strcpy(patientTemp->patientAddress, address);
+                        break;
+
+                    }
+                    else
+                    {
+                        printf("Invalid Address ,Enter address with 50 characters\n");
+                    }
+
+
+                }
                 break;
             case UPDATE_PATIENT_CONTACT_NUMBER:
                 while(true)
                 {
                     printf("Enter New Contact Number: ");
-                    char contactNumber[15];
+                    char contactNumber[MAX_FIXED_CONTACT_NUMBER];
                     if (scanf("%s", contactNumber) == 1 && strlen(contactNumber) == 10)
                     {
                         strcpy(patientTemp->patientContactNumber, contactNumber);
@@ -334,7 +444,7 @@ void updatePatientDetails()
                 while(true)
                 {
                     printf("Enter New Emergency Contact Number: ");
-                    char contactNumber[15];
+                    char contactNumber[MAX_FIXED_EMERGENCY_CONTACT];
                     if (scanf("%s", contactNumber) == 1 && strlen(contactNumber) == 10)
                     {
                         strcpy(patientTemp->patientEmergencyContactNumber, contactNumber);

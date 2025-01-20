@@ -1,17 +1,21 @@
 #ifndef STAFF_H
 #define STAFF_H
+#define MAX_FIXED_STAFF_NAME 50
+#define MAX_FIXED_STAFF_ROLE 20
+#define MAX_FIXED_STAFF_SHIFT 10
+#define MAX_FIXED_STAFF_CONTACT_NUMBER 15
+
 typedef struct staff
 {
     int staffId;
-    char staffName[50];
-    char staffRole[20];      //eg:nurse,technician,receptionist
-    char staffShift[10];    //day or night
+    char staffName[MAX_FIXED_STAFF_NAME];
+    char staffRole[MAX_FIXED_STAFF_ROLE];
+    char staffShift[MAX_FIXED_STAFF_SHIFT];
     float staffSalary;
-    char staffContactNumber[15];
+    char staffContactNumber[MAX_FIXED_STAFF_CONTACT_NUMBER];
     char staffStatus;
     struct staff *next;
 } staff;
-
 
 
 enum StaffManagementMenu

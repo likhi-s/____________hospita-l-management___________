@@ -1,16 +1,21 @@
 #ifndef PHARMACY_H
 #define PHARMACY_H
+#define MAX_FIXED_MEDICINE_NAME 50
+#define MAX_FIXED_MEDICINE_TYPE 20
+#define MAX_FIXED_MEDICINE_DOSAGE 20
+
 typedef struct pharmacy
 {
     int medicineId;
-    char medicineName[50];
+    char medicineName[MAX_FIXED_MEDICINE_NAME];
     float medicineCost;
     int medicineStockQuantity;
-    char medicineType[20];// tablet/injection
-    char medicineDosage[20];
+    char medicineType[MAX_FIXED_MEDICINE_TYPE];
+    char medicineDosage[MAX_FIXED_MEDICINE_DOSAGE];
     char medicineStatus;
     struct pharmacy *next;
-}pharmacy;
+} pharmacy;
+
 
 
 enum PharmacyMenuOption
