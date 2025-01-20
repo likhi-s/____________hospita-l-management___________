@@ -1,24 +1,31 @@
 #ifndef BILL_H
 #define BILL_H
 
+#define MAX_FIXED_PATIENT_NAME 50
+#define MAX_FIXED_TREATMENT_NAME 100
+#define MAX_FIXED_DOCTOR_NAME 15
+#define MAX_FIXED_MEDICINE_NAME 50
+#define MAX_FIXED_ROOM_TYPE 10
+#define MAX_FIXED_BILL_DATE 15
+
 typedef struct bill
 {
     int billId;
-    char patientName[50];
-    char treatmentName[100];
+    char patientName[MAX_FIXED_PATIENT_NAME];
+    char treatmentName[MAX_FIXED_TREATMENT_NAME];
     float treatmentCost;
-    char doctorName[15];
+    char doctorName[MAX_FIXED_DOCTOR_NAME];
     float consultationFee;
-    char medicineName[50];
+    char medicineName[MAX_FIXED_MEDICINE_NAME];
     float medicineCost;
     float pharmacyFee;
-    char roomType[10];
+    char roomType[MAX_FIXED_ROOM_TYPE];
     float roomFee;
     float totalBillAmount;
-    char billDate[15];
+    char billDate[MAX_FIXED_BILL_DATE];
     char billStatus;
     struct bill *next;
-} bill;
+}bill;
 
 
 enum BillMenuOption

@@ -1,15 +1,20 @@
 #ifndef DOCTOR_H
 #define DOCTOR_H
 
+#define MAX_FIXED_DOCTOR_NAME 50
+#define MAX_FIXED_SPECIALIZATION 20
+#define MAX_FIXED_CONTACT_NUMBER 15
+#define MAX_FIXED_QUALIFICATION 50
+
 typedef struct doctor
 {
     int doctorId;
-    char doctorName[50];
-    char doctorSpecialization[20];
+    char doctorName[MAX_FIXED_DOCTOR_NAME];
+    char doctorSpecialization[MAX_FIXED_SPECIALIZATION];
     float doctorConsultationFee;
-    char doctorContactNumber[15];
+    char doctorContactNumber[MAX_FIXED_CONTACT_NUMBER];
     int doctorExperience;
-    char doctorQualification[50];
+    char doctorQualification[MAX_FIXED_QUALIFICATION];
     char doctorStatus;
     struct doctor *next;
 } doctor;

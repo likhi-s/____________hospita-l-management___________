@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <time.h>
 #include "bill.h"
@@ -54,11 +55,36 @@ void loginAsBillManagementUser()
 {
     char userId[15];
     char userPass[15];
-    printf("User ID: ");
-    scanf(" %[^\n]", userId);
-    printf("User Password: ");
-    scanf(" %[^\n]", userPass);
+    while(true)
+    {
+        printf("User ID:\n");
+        char id[15];
+        if(scanf("%s",&id) ==1 && strlen(id) <=15)
+        {
+            strcpy(userId,id);
+            break;
+        }
+        else
+        {
+            printf("Invalid User Id,enter valid user id with less than 15 characters \n");
+        }
 
+    }
+    while(true)
+    {
+        printf("User Password:\n");
+        char password[15];
+        if(scanf("%s",&password) ==1 && strlen(password) <=15)
+        {
+            strcpy(userPass,password);
+            break;
+        }
+        else
+        {
+            printf("Invalid User password,enter valid user id with less than 15 characters \n ");
+        }
+
+    }
     if (strcmp(userId, "123") == 0 && strcmp(userPass, "123") == 0)
     {
         loadBillDataFromFile();
@@ -136,11 +162,25 @@ void generateBill()
     pharmacy *mTemp = searchByMedicineId();
     strcpy(billNode->medicineName, mTemp->medicineName);
     billNode->medicineCost = mTemp->medicineCost;
+    while(true)
+    {
+        int quantity = 0;
+        int quan=0;
+        printf("Enter medicine quantity provided to patient: ");
+        if(scanf("%d", &quan)==0 && quan>=0)
+        {
+            quantity = quan;
+            billNode->pharmacyFee = billNode->medicineCost * quantity;
+            break;
+        }
+        else
+        {
+            printf("invalid quantity,Enter quantity greater than 0\n");
+        }
 
-    int quantity = 0;
-    printf("Enter medicine quantity provided to patient: ");
-    scanf("%d", &quantity);
-    billNode->pharmacyFee = billNode->medicineCost * quantity;
+
+    }
+
 
     loadRoomDataFromFile();
     room *rTemp = searchByRoomId();

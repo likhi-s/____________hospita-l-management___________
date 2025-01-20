@@ -1,14 +1,16 @@
 #ifndef TREATMENT_H
 #define TREATMENT_H
+#define MAX_FIXED_TREATMENT_NAME 100
+
 typedef struct treatment
 {
     int treatmentId;
-    char treatmentName[100];
+    char treatmentName[MAX_FIXED_TREATMENT_NAME];
     int treatmentCost;
-    int treatmentDuration;//in days
+    int treatmentDuration;
     char treatmentStatus;
     struct treatment *next;
-}treatment;
+} treatment;
 
 
 enum TreatmentManagementOptions

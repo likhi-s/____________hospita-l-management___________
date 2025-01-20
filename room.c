@@ -10,6 +10,9 @@
 #define FILE_OPEN_ERROR 1
 #define STATUS_1 "Occupied"
 #define STATUS_2 "Vacant"
+#define TYPE_1 "icu"
+#define TYPE_2 "Private"
+#define TYPE_3 "General"
 
 room *roomHead = NULL;
 room *roomTemp;
@@ -59,10 +62,36 @@ void loginAsRoomManagementUser()
 
     char userId[15];
     char userPass[15];
-    printf("User ID:\n");
-    scanf(" %[^\n]", userId);
-    printf("User Password:\n");
-    scanf(" %[^\n]", userPass);
+    while(true)
+    {
+        printf("User ID:\n");
+        char id[15];
+        if(scanf("%s",&id) ==1 && strlen(id) <=15)
+        {
+            strcpy(userId,id);
+            break;
+        }
+        else
+        {
+            printf("Invalid User Id,enter valid user id with less than 15 characters\n ");
+        }
+
+    }
+    while(true)
+    {
+        printf("User Password:\n");
+        char password[15];
+        if(scanf("%s",&password) ==1 && strlen(password) <=15)
+        {
+            strcpy(userPass,password);
+            break;
+        }
+        else
+        {
+            printf("Invalid User password,enter valid user password with less than 15 characters\n ");
+        }
+
+    }
 
     if (strcmp(userId, ROOM_USER_ID) == 0 && strcmp(userPass, ROOM_USER_PASSWORD) == 0)
     {
@@ -105,7 +134,7 @@ void loginAsRoomManagementUser()
                 displayDeletedRooms();
                 break;
             case EXIT_ROOM_MANAGEMENT:
-                printf("Saved data and exiting from room menu\n");
+                printf(" Exiting from room menu\n");
                 fclose(rm);
                 return;
             default:
@@ -131,10 +160,21 @@ void addRoom()
     }
     roomNode->roomId =++lastRoomId;
     printf("Generated Room ID: %d\n", roomNode->roomId);
+    while(true)
+    {
+        char type[MAX_FIXED_ROOM_TYPE];
+        printf("Enter Room Type (icu/general/private): ");
+        if(scanf("%s",type)==1 && strcasecmp(type,TYPE_1)==0 ||strcasecmp(type,TYPE_2)==0 || strcasecmp(type,TYPE_3)==0 )
+        {
+            strcpy(roomNode->roomType ,type);
+            break;
+        }
+        else
+        {
+            printf("Invalid RoomType,Enter Room Type icu/general/private\n ");
+        }
 
-
-    printf("Enter Room Type (icu/general/private): ");
-    scanf("%s", roomNode->roomType);
+    }
     while(true)
     {
         printf("Enter Bed Count: ");
@@ -170,7 +210,7 @@ void addRoom()
     while(true)
     {
         printf("Enter Bed Status (occupied/vacant): ");
-        char status[10];
+        char status[MAX_FIXED_BED_STATUS];
         if(scanf("%s",&status)==1 && strcasecmp(status,STATUS_1)==0 || strcasecmp(status,STATUS_2)==0)
         {
             strcpy(roomNode->bedStatus, status);
@@ -182,8 +222,20 @@ void addRoom()
         }
 
     }
-    printf("Enter Room Fee: ");
-    scanf("%f", &roomNode->roomFee);
+    while(true)
+    {
+        float fee;
+        printf("Enter Room Fee: ");
+        if(scanf("%f",&fee) ==1 && fee >0)
+        {
+            roomNode->roomFee = fee;
+            break;
+        }
+        else
+        {
+            printf("invalid fee,enter fee greater than 0");
+        }
+    }
 
     roomNode->roomStatus = 'A';
     roomNode->next = NULL;
@@ -275,8 +327,22 @@ void updateRoomDetails()
             switch (choice)
             {
             case UPDATE_ROOM_TYPE:
-                printf("New Room Type: ");
-                scanf("%s", roomTemp->roomType);
+                while(true)
+                {
+                    char type[MAX_FIXED_ROOM_TYPE];
+                    printf("New Room Type (icu/general/private): ");
+                    if(scanf("%s",type)==1 && strcasecmp(type,TYPE_1)==0 ||strcasecmp(type,TYPE_2)==0 || strcasecmp(type,TYPE_3)==0 )
+                    {
+                        strcpy(roomTemp->roomType ,type);
+                        break;
+                    }
+                    else
+                    {
+                        printf("Invalid RoomType,Enter Room Type icu/general/private\n ");
+                    }
+
+                }
+
                 break;
             case UPDATE_BED_COUNT:
                 while(true)
@@ -317,7 +383,7 @@ void updateRoomDetails()
                 while(true)
                 {
                     printf("Enter Bed Status (occupied/vacant): ");
-                    char status[10];
+                    char status[MAX_FIXED_BED_STATUS];
                     if(scanf("%s",&status)==1 && strcasecmp(status,STATUS_1)==0 || strcasecmp(status,STATUS_2)==0)
                     {
                         strcpy(roomTemp->bedStatus, status);
@@ -331,8 +397,20 @@ void updateRoomDetails()
                 }
                 break;
             case UPDATE_ROOM_FEE:
-                printf("New Room Fee: ");
-                scanf("%f", &roomTemp->roomFee);
+                while(true)
+                {
+                    float fee;
+                    printf("New Room Fee: ");
+                    if(scanf("%f",&fee) ==1 && fee >0)
+                    {
+                        roomTemp->roomFee = fee;
+                        break;
+                    }
+                    else
+                    {
+                        printf("invalid fee,enter fee greater than 0");
+                    }
+                }
                 break;
             default:
                 printf("Invalid choice.\n");

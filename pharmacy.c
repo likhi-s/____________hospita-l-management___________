@@ -82,7 +82,7 @@ void loginAsPharmacyManagementUser()
     {
         printf("User Password:\n");
         char password[15];
-        if(scanf("%s",&password) ==1 && strlen(id) <=15);
+        if(scanf("%s",&password) ==1 && strlen(password) <=15)
         {
             strcpy(userPass,password);
             break;
@@ -165,9 +165,9 @@ void addMedicine()
 
     while(true)
     {
-        char name[50];
+        char name[MAX_FIXED_MEDICINE_NAME];
         printf("Enter Medicine Name: ");
-        if(scanf("%s",name) ==1 && strlen(name)<50)
+        if(scanf("%s",name) ==1 && strlen(name)<MAX_FIXED_MEDICINE_NAME)
         {
             strcpy(pharmacyNode->medicineName , name);
             break;
@@ -185,7 +185,7 @@ void addMedicine()
         printf("Enter Medicine Cost: ");
         if(scanf("%f",&cost) ==1 && cost >0)
         {
-            pharmacyNode->medicineCost = fee;
+            pharmacyNode->medicineCost = cost;
             break;
         }
         else
@@ -214,7 +214,7 @@ void addMedicine()
     while(true)
     {
         printf("Enter Medicine Type (tablet/injection): ");
-        char medicinetype[20];
+        char medicinetype[MAX_FIXED_MEDICINE_TYPE];
         if(scanf("%s",medicinetype)==1 && strcasecmp(medicinetype,MEDICINE_TYPE_1)==0 || strcasecmp(medicinetype,MEDICINE_TYPE_2) == 0)
         {
             strcpy(pharmacyNode->medicineType , medicinetype);
@@ -228,9 +228,9 @@ void addMedicine()
 
     while(true)
     {
-        char dosage[20];
+        char dosage[MAX_FIXED_MEDICINE_DOSAGE];
         printf("Enter Medicine Dosage: ");
-        if(scanf("%s",dosage) ==1 && strlen(dosage)<20)
+        if(scanf("%s",dosage) ==1 && strlen(dosage)<MAX_FIXED_MEDICINE_DOSAGE)
         {
             strcpy(pharmacyNode->medicineDosage, dosage);
             break;
@@ -340,9 +340,9 @@ void updateMedicineDetails()
             case UPDATE_MEDICINE_NAME:
                 while(true)
                 {
-                    char name[50];
+                    char name[MAX_FIXED_MEDICINE_NAME];
                     printf("New Medicine Name: ");
-                    if(scanf("%s",name) ==1 && strlen(name)<50)
+                    if(scanf("%s",name) ==1 && strlen(name)<MAX_FIXED_MEDICINE_NAME)
                     {
                         strcpy(pharmacyTemp->medicineName , name);
                         break;
@@ -361,7 +361,7 @@ void updateMedicineDetails()
                     printf("New Medicine Cost: ");
                     if(scanf("%f",&cost) ==1 && cost >0)
                     {
-                        pharmacyTemp->medicineCost = fee;
+                        pharmacyTemp->medicineCost = cost;
                         break;
                     }
                     else
@@ -393,7 +393,7 @@ void updateMedicineDetails()
                 while(true)
                 {
                     printf("Enter Medicine Type (tablet/injection): ");
-                    char medicinetype[20];
+                    char medicinetype[MAX_FIXED_MEDICINE_TYPE];
                     if(scanf("%s",medicinetype)==1 && strcasecmp(medicinetype,MEDICINE_TYPE_1)==0 || strcasecmp(medicinetype,MEDICINE_TYPE_2) == 0)
                     {
                         strcpy(pharmacyTemp->medicineType , medicinetype);
@@ -409,9 +409,9 @@ void updateMedicineDetails()
             case UPDATE_MEDICINE_DOSAGE:
                 while(true)
                 {
-                    char dosage[20];
+                    char dosage[MAX_FIXED_MEDICINE_DOSAGE];
                     printf("New Medicine Dosage: ");
-                    if(scanf("%s",dosage) ==1 && strlen(dosage)<20)
+                    if(scanf("%s",dosage) ==1 && strlen(dosage)<MAX_FIXED_MEDICINE_DOSAGE)
                     {
                         strcpy(pharmacyTemp->medicineDosage, dosage);
                         break;
